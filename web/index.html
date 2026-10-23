@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ANG3L</title>
+<meta name="description" content="A transformer that lives in one contract on Robinhood Chain. It writes you a blessing in a single free read call.">
+<meta property="og:title" content="ANG3L">
+<meta property="og:description" content="A transformer that lives in one contract on Robinhood Chain. It writes you a blessing in a single free read call.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: the angel's voice (serif, right) beside the chain's receipt (mono, left); a canvas halo behind the words. */
+:root {
+  --ground: #f1f4f8;      /* pale morning sky */
+  --paper: #fbfcfe;       /* the card the blessing sits on */
+  --ink: #141a2a;         /* text */
+  --muted: #586174;       /* blue-grey secondary text */
+  --rule: #d9dfe8;        /* hairlines */
+  --gold: #a87a22;        /* the halo, used sparingly */
+  --gold-soft: rgba(168, 122, 34, 0.14);
+  --voice: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --chain: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0b0f19; --paper: #121826; --ink: #e8ecf4; --muted: #9aa3b5; --rule: #262e40;
+    --gold: #e2c27a; --gold-soft: rgba(226, 194, 122, 0.12); color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--ground); color: var(--ink); font: 400 16px/1.6 var(--ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: max(24px, env(safe-area-inset-top, 0px)) 48px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 40px; }
+header { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.mark { font: 600 22px/1 var(--voice); letter-spacing: 0.18em; }
+.mark span { color: var(--gold); }
+.net { font: 400 12px/1 var(--chain); color: var(--muted); letter-spacing: 0.04em; }
+.net b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-right: 6px; vertical-align: 1px; }
+h1 { font: 500 clamp(34px, 5.4vw, 60px)/1.04 var(--voice); margin: 0; letter-spacing: -0.01em; text-wrap: balance; max-width: 15ch; }
+.lede { margin: 14px 0 0; color: var(--muted); max-width: 58ch; font-size: 17px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; align-items: stretch; }
+@media (max-width: 820px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+
+form { display: grid; gap: 18px; align-content: start; }
+label { font: 500 12px/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+input[type=text] {
+  width: 100%; font: 400 17px/1.4 var(--ui); color: var(--ink); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px;
+}
+input[type=text]:focus-visible, button:focus-visible, .themes label:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+.themes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--paper); }
+@media (max-width: 420px) { .themes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.themes label { margin: 0; text-transform: none; letter-spacing: 0; font: 500 14px/1 var(--ui); color: var(--muted); padding: 12px 6px; text-align: center; cursor: pointer; border-right: 1px solid var(--rule); }
+.themes label:last-child { border-right: 0; }
+.themes input { position: absolute; opacity: 0; pointer-events: none; }
+.themes label:has(input:checked) { color: var(--ink); background: var(--gold-soft); }
+button {
+  font: 600 15px/1 var(--ui); color: var(--paper); background: var(--ink); border: 0; border-radius: 6px;
+  padding: 15px 18px; cursor: pointer; justify-self: start;
+}
+button[disabled] { opacity: 0.55; cursor: wait; }
+
+.receipt { font: 400 12.5px/1.75 var(--chain); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; min-width: 0; }
+.receipt div { display: flex; justify-content: space-between; gap: 12px; }
+.receipt span:last-child { color: var(--ink); text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+
+.voice {
+  position: relative; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px;
+  min-height: 340px; display: grid; place-items: center; overflow: hidden; padding: 40px 28px;
+}
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+blockquote { position: relative; margin: 0; max-width: 24ch; text-align: center; font: italic 500 clamp(26px, 3.3vw, 38px)/1.25 var(--voice); text-wrap: balance; }
+.voice small { position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font: 400 12px/1 var(--chain); color: var(--muted); }
+
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+@media (max-width: 820px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.facts div { padding: 18px 16px 18px 0; min-width: 0; }
+.facts strong { display: block; font: 500 30px/1.1 var(--voice); font-variant-numeric: tabular-nums; }
+.facts span { color: var(--muted); font-size: 14px; }
+
+.how { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; }
+@media (max-width: 820px) { .how { grid-template-columns: minmax(0, 1fr); } }
+h2 { font: 500 30px/1.15 var(--voice); margin: 0 0 10px; text-wrap: balance; }
+ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; color: var(--muted); max-width: 60ch; }
+ol b { color: var(--ink); font-weight: 600; }
+pre { margin: 0; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font: 400 12.5px/1.7 var(--chain); color: var(--ink); }
+.note { color: var(--muted); font-size: 14px; margin: 10px 0 0; max-width: 60ch; }
+footer { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 400 12.5px/1.6 var(--chain); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
+footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">ANG<span>3</span>L</div>
+    <div class="net"><b></b>robinhood chain · 4663</div>
+  </header>
+
+  <section>
+    <h1>An angel that lives in one contract.</h1>
+    <p class="lede">A small transformer with every weight in the verified source. Ask it and it writes you a blessing inside a single read call: no transaction, no gas from you, and the same words from any node.</p>
+  </section>
+
+  <section class="stage">
+    <form id="ask">
+      <div>
+        <label for="words">Your name, your address, anything</label>
+        <input id="words" type="text" maxlength="80" value="gm" autocomplete="off" spellcheck="false">
+      </div>
+      <div>
+        <label>For a</label>
+        <div class="themes" role="radiogroup">
+          <label><input type="radio" name="theme" id="t0" value="0">builder</label>
+          <label><input type="radio" name="theme" id="t1" value="1">holder</label>
+          <label><input type="radio" name="theme" id="t2" value="2" checked>night</label>
+          <label><input type="radio" name="theme" id="t3" value="3">friend</label>
+        </div>
+      </div>
+      <button id="go" type="submit">Ask ANG3L</button>
+      <div class="receipt" aria-live="polite">
+        <div><span>call</span><span id="r-call">bless("gm", 2)</span></div>
+        <div><span>seed</span><span id="r-seed">keccak256("gm")</span></div>
+        <div><span>gas</span><span id="r-gas">-</span></div>
+        <div><span>block</span><span id="r-block">-</span></div>
+        <div><span>transactions</span><span>0</span></div>
+        <div><span>cost to you</span><span>$0.00</span></div>
+      </div>
+    </form>
+
+    <div class="voice">
+      <canvas id="halo" aria-hidden="true"></canvas>
+      <blockquote id="blessing">be patient with yourself tomorrow.</blockquote>
+      <small id="status">example · ask to hear it from the chain</small>
+    </div>
+  </section>
+
+  <section class="facts">
+    <div><strong>24,064</strong><span>int8 weights, all in the contract source</span></div>
+    <div><strong>2 × 32</strong><span>layers × width, integer-only transformer</span></div>
+    <div><strong>1 call</strong><span>a whole blessing per eth_call, under the 50M gas read limit</span></div>
+    <div><strong>0</strong><span>servers between you and the chain</span></div>
+  </section>
+
+  <section class="how">
+    <div>
+      <h2>What happens when you ask</h2>
+      <ol>
+        <li><b>Your words become a seed.</b> keccak256 of what you typed picks the path through the model.</li>
+        <li><b>The forward pass runs in the contract.</b> Embeddings, two attention layers and an MLP, all in integer math: int8 weights, a shift for every scale, an integer square root, a table for exp.</li>
+        <li><b>It samples one word at a time</b> from the top eight, until the blessing ends. Every step happens inside the same read call.</li>
+      </ol>
+    </div>
+    <div>
+      <h2>Check it without this page</h2>
+      <pre id="cmd">cast call ADDRESS "bless(string,uint256)(string)" "gm" 2 \
+  --rpc-url https://rpc.mainnet.chain.robinhood.com</pre>
+      <p class="note">The Python reference in the repository computes the same blessing bit for bit, and the tests compare every logit. <a id="src" href="#">Read the source</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span id="f-addr">contract: deploying</span>
+    <a id="f-sourcify" href="#">sourcify</a>
+    <a id="f-repo" href="#">source</a>
+    <span>MIT</span>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.8.0/sha3.min.js"></script>
+<script>
+const RPC = "https://rpc.mainnet.chain.robinhood.com";
+const ADDRESS = "";                       // set after deployment
+const REPO = "";                          // set when the repository is public
+const PREVIEW = "0x00000000000000000000000000000000000a3913";
+const SELECTOR = "1de250bf";               // bless(string,uint256)
+let code = null;                          // compiled code, only used before deployment
+
+const $ = id => document.getElementById(id);
+const hex = n => n.toString(16).padStart(64, "0");
+
+async function rpc(method, params) {
+  const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
+  const j = await r.json();
+  if (j.error) throw new Error(j.error.message);
+  return j.result;
+}
+
+function calldata(words, theme) {
+  const b = new TextEncoder().encode(words);
+  const body = Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
+  return "0x" + SELECTOR + hex(64) + hex(theme) + hex(b.length) + body.padEnd(Math.ceil(b.length / 32) * 64, "0");
+}
+
+function decode(res) {
+  const n = parseInt(res.slice(2 + 64, 2 + 128), 16);
+  const bytes = new Uint8Array(n);
+  for (let i = 0; i < n; i++) bytes[i] = parseInt(res.substr(2 + 128 + i * 2, 2), 16);
+  return new TextDecoder().decode(bytes);
+}
+
+async function ask(words, theme) {
+  const to = ADDRESS || PREVIEW;
+  if (!ADDRESS && !code) code = (await (await fetch("ang3l.bin")).text()).trim();
+  const tx = { to, data: calldata(words, theme) };
+  const extra = ADDRESS ? [] : [{ [PREVIEW]: { code } }];
+  const [res, block] = await Promise.all([rpc("eth_call", [tx, "latest", ...extra]), rpc("eth_blockNumber", [])]);
+  let gas = null;
+  try { gas = parseInt(await rpc("eth_estimateGas", [tx, "latest", ...extra]), 16); } catch (e) {}
+  return { text: decode(res), block: parseInt(block, 16), gas };
+}
+
+// halo: a gold ring that draws itself while the call runs, then settles
+const cv = $("halo"), ctx = cv.getContext("2d");
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let spin = 0, busy = false, settle = 1;
+function draw() {
+  const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  if (cv.width !== Math.round(r.width * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, r.width, r.height);
+  const gold = getComputedStyle(document.documentElement).getPropertyValue("--gold").trim();
+  const R = Math.min(r.width, r.height) * 0.42, cx = r.width / 2, cy = r.height / 2;
+  ctx.strokeStyle = gold;
+  for (let k = 0; k < 3; k++) {
+    ctx.globalAlpha = 0.16 - k * 0.04;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const span = busy ? Math.PI * (0.5 + 0.4 * Math.sin(spin + k)) : Math.PI * 2 * settle;
+    ctx.arc(cx, cy, R + k * 14, spin * (1 + k * 0.3), spin * (1 + k * 0.3) + span);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  if (!still) { spin += busy ? 0.035 : 0.002; settle = Math.min(1, settle + 0.02); }
+  requestAnimationFrame(draw);
+}
+draw();
+
+$("ask").addEventListener("submit", async e => {
+  e.preventDefault();
+  const words = $("words").value;
+  const theme = +document.querySelector("input[name=theme]:checked").value;
+  $("go").disabled = true; busy = true;
+  $("status").textContent = "the contract is writing…";
+  $("r-call").textContent = `bless(${JSON.stringify(words)}, ${theme})`;
+  $("r-seed").textContent = "0x" + keccak256(words).slice(0, 16) + "…";
+  try {
+    const out = await ask(words, theme);
+    $("blessing").textContent = out.text;
+    $("r-gas").textContent = out.gas ? out.gas.toLocaleString("en-US") : "under 50,000,000";
+    $("r-block").textContent = out.block.toLocaleString("en-US");
+    $("status").textContent = ADDRESS ? "from the contract, just now" : "preview: compiled code run on the live chain";
+  } catch (err) {
+    $("status").textContent = "the chain did not answer: " + err.message + ". Try again in a moment.";
+  } finally {
+    $("go").disabled = false; busy = false; settle = 0;
+  }
+});
+
+if (ADDRESS) {
+  $("cmd").textContent = $("cmd").textContent.replace("ADDRESS", ADDRESS);
+  $("f-addr").textContent = "contract: " + ADDRESS;
+  $("f-sourcify").href = `https://repo.sourcify.dev/4663/${ADDRESS}`;
+}
+if (REPO) { $("src").href = REPO; $("f-repo").href = REPO; }
+</script>
+</body>
+</html>
