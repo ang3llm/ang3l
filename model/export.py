@@ -194,6 +194,7 @@ tests += "\n".join(
 day = today(q, voc, T0)
 tests += f"\n    function test_today() public {{\n        vm.warp({T0});\n        _eq(a.today(), unicode\"{esc(day[1])}\");\n    }}\n"
 t, th, toks, _ = out[longest]
+(ROOT / "test").mkdir(exist_ok=True)
 (ROOT / "test/Am3n.t.sol").write_text(f"""// SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
