@@ -1,71 +1,94 @@
-# ANG3L
+# AM3N
 
-A transformer language model that lives in one contract on Robinhood Chain (chain id 4663).
-The weights, the tokenizer and the forward pass are all in the contract source. Ask it and it
-writes you a short blessing inside a single `eth_call`: no transaction, no gas paid by anyone,
-and the same words from any node.
+A mixture-of-experts transformer that lives on Robinhood Chain (chain id 4663). Its 1,221,504 int8 weights
+are stored on chain, and the engine contract runs the whole model: ask it, or hand it a wallet, and it writes
+a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the same words from any node.
 
 ```
-cast call <ADDRESS> "bless(string,uint256)(string)" "gm" 2 \
+cast call <ADDRESS> "bless(string,uint256)(string)" "satoshi" 2 \
   --rpc-url https://rpc.mainnet.chain.robinhood.com
+# the chain keeps turning; rest, satoshi.
+
+cast call <ADDRESS> "blessAddress(address)(string,uint256)" 0xYOURWALLET \
+  --rpc-url https://rpc.mainnet.chain.robinhood.com
+
+cast call <ADDRESS> "today()(string)" --rpc-url https://rpc.mainnet.chain.robinhood.com
 ```
 
-`theme` is 0 builder, 1 holder, 2 night, 3 friend. Your text only seeds the sampler; the model does
-not read or answer it.
+- `bless(words, theme)`: `theme` is 0 builder, 1 holder, 2 night, 3 friend. `words` seeds the sampler and is
+  the name the model writes where it asks for one (printable ASCII, at most 24 bytes; a 42-character address
+  is shortened to `0x1234…abcd`).
+- `blessAddress(who)`: the contract reads the wallet in the same call. A contract gets the builder's blessing,
+  0.1 ETH or more the holder's, an empty wallet the night's, anything else the friend's. The seed is the
+  wallet and the UTC day, so the words change once a day.
+- `today()`: one blessing for everyone, new at 00:00 UTC.
+- `logits(tokens)` and `generate(words, theme)` expose the raw forward pass and the token ids.
 
 ## Numbers
 
 | | |
 |---|---|
-| Weights | 24,064 int8, stored in `src/Weights.sol` |
-| Architecture | decoder-only transformer, 2 layers, width 32, 2 heads of 16, ReLU MLP of 64, tied embeddings |
-| Vocabulary / context | 203 tokens / 32 positions |
-| Contract size | 33,068 bytes (the chain allows 98,304) |
-| Gas per blessing | 11M to 28M measured on chain; at most about 36M for the longest output |
+| Weights | 1,221,504 int8 (every expert counted), 1,230,976 bytes in 14 data contracts |
+| Architecture | decoder-only transformer, 2 layers, width 128, 4 heads of 32; each layer's MLP is 8 experts of width 256 with a top-1 router; tied embeddings |
+| Weights a word touches | 301,824: the router runs one expert per layer, the other seven are never read |
+| Vocabulary / longest blessing | 294 tokens / 10 tokens |
+| Engine | 12,270 bytes |
+| Gas per blessing | 28M to 32M measured on the public RPC; 38.8M for the longest possible output |
 | Read-call limit on the public RPC | 50M gas |
 
 ## How it works
 
-Every operation is integer math, so the contract and the Python reference agree bit for bit:
+Every operation is integer math, so the contract and the Python reference agree bit for bit.
 
-1. The words you pass are hashed: `seed = keccak256(words)`.
-2. The theme token goes through the network: token and position embeddings, then per layer
-   RMSNorm, attention with a key/value cache in memory, and a ReLU MLP. Weights are int8 with a
-   power-of-two scale per tensor, so every rescale is an arithmetic shift. RMSNorm uses an integer
-   square root, attention scales by 1/4 with a shift, softmax reads exp from a 512-entry table,
-   and every division truncates toward zero, as Solidity does.
-3. The next word is drawn from the top 8 logits at temperature 0.8, using
-   `keccak256(seed, step)`. Ties go to the lower token id.
-4. Steps 2 and 3 repeat inside the same call until the end token or 20 words.
-
-`logits(uint256[])` exposes one raw forward pass, so any step can be checked on its own.
+1. **Weights on chain.** The weight stream is split into data contracts whose code is `0x00 ++ bytes` (the
+   STOP byte keeps data from ever running). Each was created through the standard CREATE2 deployer
+   `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt 0, so its address is derived from the hash of the
+   exact bytes it holds; the engine has those addresses as constants. Embeddings, attention and routers
+   (182,400 bytes) are copied into memory once per call; for each word and layer only the expert the router
+   picks is copied in.
+2. **Packed matrix kernel.** Weights are stored as `w + 128`, one 32-byte word per input column for a block of
+   32 output rows. Shifting the word by 0, 8, 16 and 24 bits and masking one byte into each 32-bit lane gives 8
+   weights; one 256-bit multiply by the input adds 8 products at once. The offset adds `128·Σx` to every row
+   and is removed once. Inputs are first shifted right until every lane stays within 32 signed bits, and the
+   shift is put back on the result. About 6.2 gas per multiply-accumulate.
+3. **The forward pass.** Token and position embeddings, then per layer RMSNorm (integer square root),
+   causal attention with a key/value cache in memory (exp from a 512-entry table), and the routed expert
+   (ReLU MLP). Every rescale is an arithmetic shift; every division truncates toward zero, as Solidity does.
+4. **Sampling.** The next token is drawn from the top 8 logits at temperature 0.8 with `keccak256(seed, step)`;
+   ties go to the lower id. Steps 3 and 4 repeat inside the same call until the end token or 10 tokens.
 
 ## Verify
 
 ```
-forge test                         # the contract reproduces the reference outputs and logits
-python model/live.py <ADDRESS>     # chain output vs the Python reference, with the gas each call needs
+forge test                          # 17 tests: blessings, wallets, the daily blessing, two full logit vectors
+python model/live.py                # before deployment: engine + all parts injected with a state override
+python model/live.py <ADDRESS>      # after deployment: chain output vs the Python reference, with gas
 ```
 
-`test/Ang3l.t.sol` is generated from the reference: eight blessings, their token ids, and two full
-logit vectors that must match exactly.
+`test/Am3n.t.sol` is generated from the reference. Its setup deploys every part through the same CREATE2
+deployer and checks that each lands at the address the engine expects.
 
 ## Reproduce
 
 ```
 python3.11 -m venv .venv && .venv/bin/pip install torch numpy pycryptodome
-.venv/bin/python model/angel.py train     # about two minutes on a laptop CPU
-.venv/bin/python model/export.py          # writes src/Weights.sol and test/Ang3l.t.sol
+.venv/bin/python model/angel.py train   # optional: retrain (a few minutes on a laptop GPU)
+.venv/bin/python model/export.py        # parts/, src/Weights.sol, test/Am3n.t.sol, docs/parts.json
 forge test
 ```
 
-The training data is synthetic: `model/corpus.py` generates 60,000 short blessings from a small
-grammar (201 distinct words). No outside text is used.
+`model/weights.json` is the trained, quantized model that is deployed: training on a GPU is not bit for bit
+repeatable, so the weights themselves are committed and everything else (`parts/`, `src/Weights.sol`, the
+tests) is generated from them by `export.py`; each part's CREATE2 address then proves the chain holds exactly
+these bytes. The training data is synthetic: `model/corpus.py` generates
+80,000 short blessings from a grammar. No outside text is used. `deploy.py` deploys the parts and the
+engine (it shows the cost and asks first).
 
 ## Limits
 
-This is a small model with a small vocabulary. It writes short, simple blessings; it does not
-understand questions, and it knows nothing beyond its corpus.
+The model writes short blessings in four moods. It does not answer questions or follow instructions, and it
+knows nothing beyond its corpus. The words come from a grammar, so they are simple; the point is that every
+one of them is computed on chain, for free, by anyone.
 
 ## License
 

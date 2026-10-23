@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ANG3L</title>
-<meta name="description" content="A transformer that lives in one contract on Robinhood Chain. It writes you a blessing in a single free read call.">
-<meta property="og:title" content="ANG3L">
-<meta property="og:description" content="A transformer that lives in one contract on Robinhood Chain. It writes you a blessing in a single free read call.">
+<title>AM3N</title>
+<meta name="description" content="A 1.22M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
+<meta property="og:title" content="AM3N">
+<meta property="og:description" content="A 1.22M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,7 @@
   }
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body {
   background: var(--ground); color: var(--ink); font: 400 16px/1.6 var(--ui);
@@ -97,40 +98,68 @@ pre { margin: 0; background: var(--paper); border: 1px solid var(--rule); border
 .note { color: var(--muted); font-size: 14px; margin: 10px 0 0; max-width: 60ch; }
 footer { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 400 12.5px/1.6 var(--chain); color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
 footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
+.modes { display: flex; gap: 6px; flex-wrap: wrap; }
+.modes button { background: transparent; color: var(--muted); border: 1px solid var(--rule); padding: 10px 14px; font-weight: 500; }
+.modes button[aria-pressed=true] { color: var(--ink); background: var(--gold-soft); border-color: var(--gold); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+.today { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; background: var(--paper); }
+.today p { margin: 0; font: italic 500 22px/1.35 var(--voice); }
+.today small { display: block; font: 400 12px/1.6 var(--chain); color: var(--muted); margin-top: 6px; }
+.wall { display: grid; gap: 8px; }
+.wall div { display: grid; grid-template-columns: 11ch minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.wall span:first-child { font: 400 12.5px/1.6 var(--chain); color: var(--muted); }
+.wall span:last-child { font: italic 500 18px/1.4 var(--voice); }
+.parts { font: 400 12px/1.8 var(--chain); color: var(--muted); columns: 2 22ch; margin: 0; padding: 0; list-style: none; }
+.parts a { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="mark">ANG<span>3</span>L</div>
+    <div class="mark">AM<span>3</span>N</div>
     <div class="net"><b></b>robinhood chain · 4663</div>
   </header>
 
   <section>
-    <h1>An angel that lives in one contract.</h1>
-    <p class="lede">A small transformer with every weight in the verified source. Ask it and it writes you a blessing inside a single read call: no transaction, no gas from you, and the same words from any node.</p>
+    <h1>An angel that lives on chain.</h1>
+    <p class="lede">A mixture-of-experts transformer with 1,221,504 weights stored on Robinhood Chain. Ask it, or hand it a wallet, and it writes a whole blessing inside one read call: no transaction, no gas from you, the same words from any node.</p>
+  </section>
+
+  <section class="today" aria-live="polite">
+    <div><p id="today">…</p><small id="today-meta">today's blessing, the same for everyone until 00:00 UTC</small></div>
+    <button class="ghost" id="today-share" type="button">Share</button>
   </section>
 
   <section class="stage">
     <form id="ask">
-      <div>
-        <label for="words">Your name, your address, anything</label>
-        <input id="words" type="text" maxlength="80" value="gm" autocomplete="off" spellcheck="false">
+      <div class="modes" role="group" aria-label="What to bless">
+        <button type="button" id="m-name" aria-pressed="true">A name</button>
+        <button type="button" id="m-wallet" aria-pressed="false">A wallet</button>
       </div>
-      <div>
-        <label>For a</label>
+      <div id="name-fields">
+        <label for="words">Your name, or anything</label>
+        <input id="words" type="text" maxlength="80" value="gm" autocomplete="off" spellcheck="false">
+        <label style="margin-top:14px">For a</label>
         <div class="themes" role="radiogroup">
-          <label><input type="radio" name="theme" id="t0" value="0">builder</label>
-          <label><input type="radio" name="theme" id="t1" value="1">holder</label>
-          <label><input type="radio" name="theme" id="t2" value="2" checked>night</label>
-          <label><input type="radio" name="theme" id="t3" value="3">friend</label>
+          <label><input type="radio" name="theme" value="0">builder</label>
+          <label><input type="radio" name="theme" value="1">holder</label>
+          <label><input type="radio" name="theme" value="2" checked>night</label>
+          <label><input type="radio" name="theme" value="3">friend</label>
         </div>
       </div>
-      <button id="go" type="submit">Ask ANG3L</button>
+      <div id="wallet-fields" hidden>
+        <label for="wallet">A wallet address</label>
+        <input id="wallet" type="text" maxlength="42" placeholder="0x…" autocomplete="off" spellcheck="false">
+        <p class="note">The contract reads the wallet in the same call: a contract gets the builder's blessing, 0.1 ETH or more the holder's, an empty wallet the night's, anything else the friend's. New words every day.</p>
+      </div>
+      <div class="row">
+        <button id="go" type="submit">Ask AM3N</button>
+        <button class="ghost" id="share" type="button" disabled>Share card</button>
+      </div>
       <div class="receipt" aria-live="polite">
         <div><span>call</span><span id="r-call">bless("gm", 2)</span></div>
-        <div><span>seed</span><span id="r-seed">keccak256("gm")</span></div>
         <div><span>gas</span><span id="r-gas">-</span></div>
         <div><span>block</span><span id="r-block">-</span></div>
         <div><span>transactions</span><span>0</span></div>
@@ -140,54 +169,78 @@ footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
 
     <div class="voice">
       <canvas id="halo" aria-hidden="true"></canvas>
-      <blockquote id="blessing">be patient with yourself tomorrow.</blockquote>
+      <blockquote id="blessing">rest now, gm; your mind will be soft.</blockquote>
       <small id="status">example · ask to hear it from the chain</small>
     </div>
   </section>
 
   <section class="facts">
-    <div><strong>24,064</strong><span>int8 weights, all in the contract source</span></div>
-    <div><strong>2 × 32</strong><span>layers × width, integer-only transformer</span></div>
+    <div><strong>1,221,504</strong><span>int8 weights on chain, 8 experts in each of 2 layers</span></div>
+    <div><strong>302k</strong><span>weights a word actually touches: a router picks one expert</span></div>
     <div><strong>1 call</strong><span>a whole blessing per eth_call, under the 50M gas read limit</span></div>
-    <div><strong>0</strong><span>servers between you and the chain</span></div>
+    <div><strong>0</strong><span>transactions, servers or keys between you and the chain</span></div>
+  </section>
+
+  <section class="how" id="wall-section" hidden>
+    <div>
+      <h2>Every new holder, blessed</h2>
+      <p class="note">The latest wallets to receive the token, each blessed by the contract as this page loads.</p>
+    </div>
+    <div class="wall" id="wall"></div>
   </section>
 
   <section class="how">
     <div>
       <h2>What happens when you ask</h2>
       <ol>
-        <li><b>Your words become a seed.</b> keccak256 of what you typed picks the path through the model.</li>
-        <li><b>The forward pass runs in the contract.</b> Embeddings, two attention layers and an MLP, all in integer math: int8 weights, a shift for every scale, an integer square root, a table for exp.</li>
-        <li><b>It samples one word at a time</b> from the top eight, until the blessing ends. Every step happens inside the same read call.</li>
+        <li><b>Your words become a seed.</b> keccak256 of what you typed, or of the wallet and the day, picks the path through the model.</li>
+        <li><b>The weights are read from chain.</b> Embeddings and attention load once; for every word a router picks one of eight experts per layer, and only that expert is read.</li>
+        <li><b>The forward pass runs in the contract,</b> integer math only: eight int8 weights per 256-bit multiply, a shift for every scale, an integer square root, a table for exp.</li>
+        <li><b>It samples one word at a time</b> from the top eight until the blessing ends, and writes your name where the model asks for it. Every step happens inside the same read call.</li>
       </ol>
+      <p class="note">Other on-chain models need hundreds of paid transactions for a single word. This one answers a whole sentence for free.</p>
     </div>
     <div>
       <h2>Check it without this page</h2>
       <pre id="cmd">cast call ADDRESS "bless(string,uint256)(string)" "gm" 2 \
+  --rpc-url https://rpc.mainnet.chain.robinhood.com
+
+cast call ADDRESS "blessAddress(address)(string,uint256)" 0xYOURWALLET \
+  --rpc-url https://rpc.mainnet.chain.robinhood.com
+
+cast call ADDRESS "today()(string)" \
   --rpc-url https://rpc.mainnet.chain.robinhood.com</pre>
       <p class="note">The Python reference in the repository computes the same blessing bit for bit, and the tests compare every logit. <a id="src" href="#">Read the source</a>.</p>
+      <h2 style="margin-top:24px">Where the weights live</h2>
+      <p class="note">Each data contract was created through the standard CREATE2 deployer (0x4e59…956C, salt 0), so its address is derived from the hash of the exact bytes it holds. A different weight cannot sit at these addresses.</p>
+      <ul class="parts" id="parts"></ul>
     </div>
   </section>
 
   <footer>
-    <span id="f-addr">contract: deploying</span>
+    <span id="f-addr">engine: deploying</span>
     <a id="f-sourcify" href="#">sourcify</a>
     <a id="f-repo" href="#">source</a>
     <span>MIT</span>
   </footer>
 </div>
 
+<canvas id="card" width="1200" height="630" hidden></canvas>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.8.0/sha3.min.js"></script>
 <script>
 const RPC = "https://rpc.mainnet.chain.robinhood.com";
-const ADDRESS = "";                       // set after deployment
+const ADDRESS = "";                       // the engine, set after deployment
+const TOKEN = "";                         // the token, set after launch: turns on the holder wall
 const REPO = "";                          // set when the repository is public
+const SITE = location.origin + location.pathname;
 const PREVIEW = "0x00000000000000000000000000000000000a3913";
-const SELECTOR = "1de250bf";               // bless(string,uint256)
-let code = null;                          // compiled code, only used before deployment
+const EXPLORER = "https://robinhoodchain.blockscout.com/address/";
+let preview = null;                       // { engine, parts }: compiled code, only used before deployment
 
 const $ = id => document.getElementById(id);
-const hex = n => n.toString(16).padStart(64, "0");
+const word = n => BigInt(n).toString(16).padStart(64, "0");
+const sel = sig => keccak256(sig).slice(0, 8);
+let last = null;                          // the blessing on screen, for the share card
 
 async function rpc(method, params) {
   const r = await fetch(RPC, { method: "POST", headers: { "content-type": "application/json" },
@@ -197,29 +250,38 @@ async function rpc(method, params) {
   return j.result;
 }
 
-function calldata(words, theme) {
-  const b = new TextEncoder().encode(words);
+function strArg(s) {
+  const b = new TextEncoder().encode(s);
   const body = Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
-  return "0x" + SELECTOR + hex(64) + hex(theme) + hex(b.length) + body.padEnd(Math.ceil(b.length / 32) * 64, "0");
+  return word(b.length) + body.padEnd(Math.ceil(b.length / 32) * 64, "0");
 }
 
-function decode(res) {
-  const n = parseInt(res.slice(2 + 64, 2 + 128), 16);
+function strAt(res, at) {                 // ABI string whose offset word sits at byte `at` of the result
+  const off = parseInt(res.slice(2 + at * 2, 2 + at * 2 + 64), 16);
+  const n = parseInt(res.slice(2 + off * 2, 2 + off * 2 + 64), 16);
   const bytes = new Uint8Array(n);
-  for (let i = 0; i < n; i++) bytes[i] = parseInt(res.substr(2 + 128 + i * 2, 2), 16);
+  for (let i = 0; i < n; i++) bytes[i] = parseInt(res.substr(2 + (off + 32 + i) * 2, 2), 16);
   return new TextDecoder().decode(bytes);
 }
 
-async function ask(words, theme) {
-  const to = ADDRESS || PREVIEW;
-  if (!ADDRESS && !code) code = (await (await fetch("ang3l.bin")).text()).trim();
-  const tx = { to, data: calldata(words, theme) };
-  const extra = ADDRESS ? [] : [{ [PREVIEW]: { code } }];
+async function call(data) {
+  let extra = [];
+  if (!ADDRESS) {
+    preview = preview || await (await fetch("preview.json")).json();
+    const o = { [PREVIEW]: { code: preview.engine } };
+    for (const [a, c] of Object.entries(preview.parts)) o[a] = { code: c };
+    extra = [o];
+  }
+  const tx = { to: ADDRESS || PREVIEW, data, gas: "0x2faf080" };
   const [res, block] = await Promise.all([rpc("eth_call", [tx, "latest", ...extra]), rpc("eth_blockNumber", [])]);
   let gas = null;
   try { gas = parseInt(await rpc("eth_estimateGas", [tx, "latest", ...extra]), 16); } catch (e) {}
-  return { text: decode(res), block: parseInt(block, 16), gas };
+  return { res, block: parseInt(block, 16), gas };
 }
+
+const bless = (words, theme) => call("0x" + sel("bless(string,uint256)") + word(64) + word(theme) + strArg(words));
+const blessAddress = who => call("0x" + sel("blessAddress(address)") + who.slice(2).toLowerCase().padStart(64, "0"));
+const today = () => call("0x" + sel("today()"));
 
 // halo: a gold ring that draws itself while the call runs, then settles
 const cv = $("halo"), ctx = cv.getContext("2d");
@@ -247,20 +309,40 @@ function draw() {
 }
 draw();
 
+let mode = "name";
+function setMode(m) {
+  mode = m;
+  $("m-name").setAttribute("aria-pressed", m === "name");
+  $("m-wallet").setAttribute("aria-pressed", m === "wallet");
+  $("name-fields").hidden = m !== "name";
+  $("wallet-fields").hidden = m !== "wallet";
+}
+$("m-name").onclick = () => setMode("name");
+$("m-wallet").onclick = () => setMode("wallet");
+
 $("ask").addEventListener("submit", async e => {
   e.preventDefault();
-  const words = $("words").value;
-  const theme = +document.querySelector("input[name=theme]:checked").value;
+  let job, label;
+  if (mode === "wallet") {
+    const who = $("wallet").value.trim();
+    if (!/^0x[0-9a-fA-F]{40}$/.test(who)) { $("status").textContent = "that is not a wallet address"; return; }
+    job = blessAddress(who); label = `blessAddress(${who.slice(0, 6)}…${who.slice(-4)})`;
+  } else {
+    const words = $("words").value, theme = +document.querySelector("input[name=theme]:checked").value;
+    job = bless(words, theme); label = `bless(${JSON.stringify(words)}, ${theme})`;
+  }
   $("go").disabled = true; busy = true;
   $("status").textContent = "the contract is writing…";
-  $("r-call").textContent = `bless(${JSON.stringify(words)}, ${theme})`;
-  $("r-seed").textContent = "0x" + keccak256(words).slice(0, 16) + "…";
+  $("r-call").textContent = label;
   try {
-    const out = await ask(words, theme);
-    $("blessing").textContent = out.text;
+    const out = await job;
+    const text = strAt(out.res, 0);
+    $("blessing").textContent = text;
     $("r-gas").textContent = out.gas ? out.gas.toLocaleString("en-US") : "under 50,000,000";
     $("r-block").textContent = out.block.toLocaleString("en-US");
     $("status").textContent = ADDRESS ? "from the contract, just now" : "preview: compiled code run on the live chain";
+    last = { text, block: out.block, gas: out.gas, call: label };
+    $("share").disabled = false;
   } catch (err) {
     $("status").textContent = "the chain did not answer: " + err.message + ". Try again in a moment.";
   } finally {
@@ -268,9 +350,78 @@ $("ask").addEventListener("submit", async e => {
   }
 });
 
+// share card: the blessing as a 1200x630 image plus a post with the text and the call that wrote it
+async function card(b) {
+  await Promise.all(["italic 500 56px 'Cormorant Garamond'", "600 34px 'Cormorant Garamond'", "400 20px 'IBM Plex Mono'"].map(f => document.fonts.load(f)));
+  const c = $("card").getContext("2d"), W = 1200, H = 630;
+  c.fillStyle = "#0b0f19"; c.fillRect(0, 0, W, H);
+  for (const [a, w] of [[0.1, 16], [0.28, 9], [1, 5]]) {
+    c.globalAlpha = a; c.strokeStyle = "#e2c27a"; c.lineWidth = w;
+    c.beginPath(); c.ellipse(W / 2, 118, 150, 38, -0.12, 0, Math.PI * 2); c.stroke();
+  }
+  c.globalAlpha = 1; c.fillStyle = "#e8ecf4"; c.textAlign = "center";
+  c.font = "italic 500 56px 'Cormorant Garamond'";
+  const lines = [], words = b.text.split(" ");
+  let cur = "";
+  for (const w of words) { const t = cur ? cur + " " + w : w; if (c.measureText(t).width > 980 && cur) { lines.push(cur); cur = w; } else cur = t; }
+  lines.push(cur);
+  lines.forEach((l, i) => c.fillText(l, W / 2, 300 + (i - (lines.length - 1) / 2) * 68));
+  c.font = "600 34px 'Cormorant Garamond'"; c.fillStyle = "#e2c27a";
+  c.fillText("AM3N", W / 2, 520);
+  c.font = "400 20px 'IBM Plex Mono'"; c.fillStyle = "#9aa3b5";
+  c.fillText(`written on Robinhood Chain in one free call · block ${b.block.toLocaleString("en-US")}`, W / 2, 566);
+  $("card").toBlob(blob => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "am3n-blessing.png"; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+  const post = `"${b.text}"\n\nwritten on chain by AM3N, in one free call. ask yours:`;
+  window.open("https://x.com/intent/post?text=" + encodeURIComponent(post) + "&url=" + encodeURIComponent(SITE), "_blank", "noopener");
+}
+$("share").onclick = () => last && card(last);
+
+let daily = null;
+today().then(out => {
+  daily = { text: strAt(out.res, 0), block: out.block };
+  $("today").textContent = daily.text;
+}).catch(() => { $("today").textContent = "the chain is quiet right now; try again in a moment."; });
+$("today-share").onclick = () => daily && card(daily);
+
+// holder wall: recent receivers of the token that are wallets, each blessed by the contract
+async function wall() {
+  const head = parseInt(await rpc("eth_blockNumber", []), 16);
+  const topic = "0x" + keccak256("Transfer(address,address,uint256)");
+  const logs = await rpc("eth_getLogs", [{ address: TOKEN, topics: [topic], fromBlock: "0x" + Math.max(0, head - 20000).toString(16), toBlock: "latest" }]);
+  const seen = new Set(), who = [];
+  for (const l of logs.reverse()) {
+    const to = "0x" + l.topics[2].slice(26);
+    if (seen.has(to) || to === "0x" + "0".repeat(40)) continue;
+    seen.add(to);
+    if ((await rpc("eth_getCode", [to, "latest"])) !== "0x") continue;   // pools and routers are contracts
+    who.push(to);
+    if (who.length === 8) break;
+  }
+  $("wall-section").hidden = who.length === 0;
+  for (const w of who) {
+    const row = document.createElement("div");
+    row.innerHTML = `<span>${w.slice(0, 6)}…${w.slice(-4)}</span><span>…</span>`;
+    $("wall").append(row);
+    blessAddress(w).then(o => { row.lastChild.textContent = strAt(o.res, 0); }).catch(() => row.remove());
+  }
+}
+if (TOKEN) wall().catch(() => {});
+
+fetch("parts.json").then(r => r.json()).then(list => {
+  for (const a of list) {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${EXPLORER}${a}" rel="noopener">${a.slice(0, 10)}…${a.slice(-6)}</a>`;
+    $("parts").append(li);
+  }
+}).catch(() => {});
+
 if (ADDRESS) {
-  $("cmd").textContent = $("cmd").textContent.replace("ADDRESS", ADDRESS);
-  $("f-addr").textContent = "contract: " + ADDRESS;
+  $("cmd").textContent = $("cmd").textContent.replaceAll("ADDRESS", ADDRESS);
+  $("f-addr").textContent = "engine: " + ADDRESS;
   $("f-sourcify").href = `https://repo.sourcify.dev/4663/${ADDRESS}`;
 }
 if (REPO) { $("src").href = REPO; $("f-repo").href = REPO; }

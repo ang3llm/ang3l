@@ -20,10 +20,24 @@ contract Am3n {
         bytes ex; // exp table
     }
 
-    /// @notice Write a blessing. `words` seeds the sampler (a name, an address, anything);
-    /// `theme` is 0 builder, 1 holder, 2 night, 3 friend. Same input, same blessing.
+    /// @notice Write a blessing. `words` seeds the sampler and is the name the angel uses (a name, an address,
+    /// anything); `theme` is 0 builder, 1 holder, 2 night, 3 friend. Same input, same blessing.
     function bless(string calldata words, uint256 theme) external view returns (string memory) {
-        return string(_text(_generate(keccak256(bytes(words)), theme)));
+        return string(_text(_generate(keccak256(bytes(words)), theme), _name(bytes(words))));
+    }
+
+    /// @notice Bless a wallet. The angel reads it in the same call: a contract gets the builder's blessing,
+    /// 0.1 ETH or more the holder's, an empty wallet the night's, anything else the friend's. New words each day.
+    function blessAddress(address who) external view returns (string memory text, uint256 theme) {
+        theme = who.code.length > 0 ? 0 : who.balance >= 0.1 ether ? 1 : who.balance == 0 ? 2 : 3;
+        bytes32 seed = keccak256(abi.encodePacked(who, block.timestamp / 1 days));
+        text = string(_text(_generate(seed, theme), _short(who)));
+    }
+
+    /// @notice Today's blessing, the same for everyone until 00:00 UTC.
+    function today() external view returns (string memory) {
+        uint256 day = block.timestamp / 1 days;
+        return string(_text(_generate(keccak256(abi.encodePacked("am3n", day)), day % 4), "friend"));
     }
 
     /// @notice The token ids behind `bless`, theme token first.
@@ -392,10 +406,15 @@ contract Am3n {
         }
     }
 
-    function _text(uint256[] memory toks) private pure returns (bytes memory out) {
+    /// Detokenize: words joined by spaces, punctuation glued to the word before, <name> replaced by `name`.
+    function _text(uint256[] memory toks, bytes memory name) private pure returns (bytes memory out) {
         bytes memory voc = VOCAB;
         bytes memory off = VOFF;
         for (uint256 k = 1; k < toks.length; ++k) {
+            if (toks[k] == NAME) {
+                out = out.length > 0 ? bytes.concat(out, " ", name) : name;
+                continue;
+            }
             uint256 a = _u16(off, toks[k]);
             uint256 b = _u16(off, toks[k] + 1);
             bytes1 c = voc[a];
@@ -405,6 +424,33 @@ contract Am3n {
             for (uint256 i; i < b - a; ++i) word[i] = voc[a + i];
             out = bytes.concat(out, word);
         }
+    }
+
+    /// The name as written: a 42-character 0x address is shortened to 0x1234…abcd; anything else keeps
+    /// printable ASCII only, at most 24 bytes; nothing left means "friend".
+    function _name(bytes calldata b) private pure returns (bytes memory out) {
+        if (b.length == 42 && b[0] == "0" && b[1] == "x") return bytes.concat(b[:6], unicode"…", b[38:]);
+        out = new bytes(24);
+        uint256 n;
+        for (uint256 i; i < b.length && n < 24; ++i) {
+            if (b[i] >= 0x20 && b[i] <= 0x7e) out[n++] = b[i];
+        }
+        if (n == 0) return "friend";
+        assembly { mstore(out, n) }
+    }
+
+    function _short(address who) private pure returns (bytes memory) {
+        bytes20 a = bytes20(who);
+        bytes memory hexd = "0123456789abcdef";
+        bytes memory s = new bytes(4);
+        bytes memory e = new bytes(4);
+        for (uint256 i; i < 2; ++i) {
+            s[2 * i] = hexd[uint8(a[i]) >> 4];
+            s[2 * i + 1] = hexd[uint8(a[i]) & 15];
+            e[2 * i] = hexd[uint8(a[18 + i]) >> 4];
+            e[2 * i + 1] = hexd[uint8(a[18 + i]) & 15];
+        }
+        return bytes.concat("0x", s, unicode"…", e);
     }
 
     function _u16(bytes memory b, uint256 i) private pure returns (uint256) {

@@ -62,6 +62,8 @@ if __name__ == "__main__":
         override = part_override()
         override[TMP] = {"code": code if code.startswith("0x") else "0x" + code}
         print(f"state override: engine + {len(override) - 1} weight parts")
+        (ROOT / "docs/preview.json").write_text(json.dumps(   # lets the page run the undeployed model the same way
+            {"engine": override[TMP]["code"], "parts": {a: v["code"] for a, v in override.items() if a != TMP}}))
     q, voc = load()
     ok = True
     for words, theme in [("satoshi", 0), ("gm", 1), ("0x8d6b11cfdf079e27c17e05cb7ea81235887691c6", 2), ("mom", 3)]:

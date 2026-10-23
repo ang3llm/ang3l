@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 HERE = Path(__file__).parent
 # d model width, L layers, H heads, F expert width, NX experts per layer (one runs per token), T positions,
 # A fractional bits of activations, K top-k sampling, MAXNEW longest blessing in tokens (words + end).
-CFG = dict(d=128, L=2, H=4, F=256, NX=8, T=20, A=12, K=8, MAXNEW=11)
+CFG = dict(d=128, L=2, H=4, F=256, NX=8, T=12, A=12, K=8, MAXNEW=11)
 DH = 32                                                          # head size
 QK = 2                                                           # attention scores are scaled by 2^-QK
 EXP_BITS = 5                                                     # exp table step is 1/32
@@ -97,21 +97,56 @@ def sample(logits, seed, step, banned):
         r -= wi
 
 
-def bless(q, voc, theme, text):
-    seed = keccak.new(digest_bits=256, data=text.encode()).digest()
+k256 = lambda b: keccak.new(digest_bits=256, data=b).digest()
+
+
+def run(q, voc, theme, seed, name):
+    """Generate from theme index `theme` with sampler seed `seed`; "<name>" becomes `name` (bytes)."""
     banned = {voc.index(w) for w in ["<pad>"] + THEMES}
-    toks = [voc.index(theme)]
+    toks = [voc.index(THEMES[theme])]
     for step in range(CFG["MAXNEW"]):
         t = sample(forward(q, toks), seed, step, banned)
         if t == 1:
             break
         toks.append(t)
-    return toks, detok([voc[t] for t in toks[1:]])
+    return toks, detok([voc[t] for t in toks[1:]], name)
 
 
-def detok(words):
+def bless(q, voc, theme, text):
+    """bless(string words, uint256 theme): `words` seeds the sampler and is the name in the blessing."""
+    return run(q, voc, THEMES.index(theme) if isinstance(theme, str) else theme, k256(text.encode()), name_of(text.encode()))
+
+
+def bless_address(q, voc, who, balance, has_code, timestamp):
+    """blessAddress(address): the theme comes from the wallet itself, the seed changes once a day."""
+    theme = 0 if has_code else 1 if balance >= 10 ** 17 else 2 if balance == 0 else 3
+    toks, text = run(q, voc, theme, k256(who + (timestamp // 86400).to_bytes(32, "big")), short(who))
+    return toks, text, theme
+
+
+def today(q, voc, timestamp):
+    day = timestamp // 86400
+    return run(q, voc, day % 4, k256(b"am3n" + day.to_bytes(32, "big")), b"friend")
+
+
+def short(addr):
+    """0x1234…abcd for a 20-byte address."""
+    return b"0x" + addr[:2].hex().encode() + "…".encode() + addr[-2:].hex().encode()
+
+
+def name_of(b):
+    """The name as the contract writes it: a 42-character 0x address is shortened, anything else keeps
+    printable ASCII only, at most 24 bytes; nothing left means "friend"."""
+    if len(b) == 42 and b[:2] == b"0x":
+        return b[:6] + "…".encode() + b[-4:]
+    out = bytes(c for c in b if 0x20 <= c <= 0x7E)[:24]
+    return out or b"friend"
+
+
+def detok(words, name=b"friend"):
     out = ""
     for w in words:
+        w = name.decode() if w == "<name>" else w
         out += w if (w in ",.;" or not out) else " " + w
     return out
 
@@ -199,7 +234,7 @@ def train(steps=4000):
                 h = rms(x, m.g2)
                 pr = (h @ m.Wr).softmax(-1)                                  # B n NX
                 e = pr.argmax(-1)
-                ys = torch.einsum("bnf,xfd->bnxd", torch.relu(torch.einsum("bnd,xdf->bnxf", h, m.W1)), m.W2)
+                ys = torch.einsum("bnxf,xfd->bnxd", torch.relu(torch.einsum("bnd,xdf->bnxf", h, m.W1)), m.W2)
                 y = ys.gather(2, e[..., None, None].expand(B, n, 1, d)).squeeze(2)
                 g = pr.gather(-1, e[..., None])
                 x = x + y * (g / g.detach())          # forward value is exactly the expert's output; the router still learns

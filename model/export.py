@@ -7,14 +7,14 @@ import numpy as np
 from Crypto.Hash import keccak
 
 sys.path.insert(0, str(Path(__file__).parent))
-from angel import CFG, DH, QK, EXP, THEMES, load, bless, forward
+from angel import CFG, DH, QK, EXP, THEMES, load, bless, bless_address, today, forward
 
 ROOT = Path(__file__).parent.parent
 q, voc = load()
 D, L, H, F, NX, T, A, MAXNEW = (CFG[k] for k in ("d", "L", "H", "F", "NX", "T", "A", "MAXNEW"))
 V = len(voc)
 VP = -(-V // 32) * 32
-CHUNK = 98303                                   # data per part: max code size 98,304 minus the leading STOP byte
+CHUNK = 88000                                   # data per part: keeps each deploy tx well under RH's ~95 KB submission bound
 DEPLOYER = "4e59b44847b379578588920ca78fbf26c0b4956c"   # the standard CREATE2 deployer, present on chain 4663
 SALT = bytes(32)
 k256 = lambda b: keccak.new(digest_bits=256, data=b).digest()
@@ -83,6 +83,7 @@ for i in range(0, len(blob), CHUNK):
     (ROOT / f"parts/{len(addrs):02d}.bin").write_bytes(init)
     addrs.append(k256(b"\xff" + bytes.fromhex(DEPLOYER) + SALT + k256(init))[12:])
 
+(ROOT / "docs/parts.json").write_text(json.dumps(["0x" + a.hex() for a in addrs]))
 PARAMS = V * D + T * D + D + L * (2 * D + 4 * D * D + NX * D + NX * 2 * F * D)
 vbytes, voff = bytearray(), [0]
 for tok in voc:
@@ -139,6 +140,7 @@ uint256 constant THEME0 = {themes[0]}; // {THEMES[0]}
 uint256 constant THEME1 = {themes[1]}; // {THEMES[1]}
 uint256 constant THEME2 = {themes[2]}; // {THEMES[2]}
 uint256 constant THEME3 = {themes[3]}; // {THEMES[3]}
+uint256 constant NAME = {voc.index("<name>")}; // <name>, filled with the caller's name
 
 // the data contracts, 20 bytes each, in stream order
 bytes constant PARTS =
@@ -170,13 +172,25 @@ longest = max(range(len(out)), key=lambda i: len(out[i][2]))
 arr = lambda xs, ty: "[" + ", ".join([f"{ty}({xs[0]})"] + [str(x) for x in xs[1:]]) + "]"
 esc = lambda s: s.replace("\\", "\\\\").replace('"', '\\"')
 tests = "\n".join(
-    f'    function test_bless_{i}() public view {{\n        _eq(a.bless("{t}", {th}), "{esc(text)}");\n'
+    f'    function test_bless_{i}() public view {{\n        _eq(a.bless("{t}", {th}), unicode"{esc(text)}");\n'
     f'        uint256[] memory got = a.generate("{t}", {th});\n        uint256[{len(toks)}] memory want = {arr(toks, "uint256")};\n'
     f'        require(got.length == {len(toks)}, "ids length");\n        for (uint256 i; i < {len(toks)}; ++i) require(got[i] == want[i], "ids");\n    }}\n'
     for i, (t, th, toks, text) in enumerate(out))
 tests += "\n".join(
     f"    function test_logits_{i}() public view {{\n        uint256[{len(s)}] memory s = {arr(s, 'uint256')};\n        uint256[] memory seq = new uint256[]({len(s)});\n        for (uint256 i; i < {len(s)}; ++i) seq[i] = s[i];\n        int256[{V}] memory want = {arr(l, 'int256')};\n        int256[] memory got = a.logits(seq);\n        require(got.length == {V}, \"logits length\");\n        for (uint256 i; i < {V}; ++i) if (got[i] != want[i]) revert Mismatch(i, got[i], want[i]);\n    }}\n"
     for i, (s, l) in enumerate(zip(seqs, lg)))
+T0 = 1792800000                                   # a fixed block time for the wallet and daily cases
+wallets = [(bytes.fromhex("1111111111111111111111111111111111111111"), 0, False),
+           (bytes.fromhex("2222222222222222222222222222222222222222"), 10 ** 18, False),
+           (bytes.fromhex("3333333333333333333333333333333333333333"), 10 ** 16, False),
+           (bytes.fromhex("4444444444444444444444444444444444444444"), 0, True)]
+tests += "\n".join(
+    f"    function test_bless_address_{i}() public {{\n        vm.warp({T0});\n        address who = address(bytes20(hex\"{w.hex()}\"));\n"
+    f"        vm.deal(who, {bal});\n" + ('        vm.etch(who, hex"00");\n' if code else "") +
+    f"        (string memory got, uint256 theme) = a.blessAddress(who);\n        _eq(got, unicode\"{esc(r[1])}\");\n        require(theme == {r[2]}, \"theme\");\n    }}\n"
+    for i, (w, bal, code) in enumerate(wallets) for r in [bless_address(q, voc, w, bal, code, T0)])
+day = today(q, voc, T0)
+tests += f"\n    function test_today() public {{\n        vm.warp({T0});\n        _eq(a.today(), unicode\"{esc(day[1])}\");\n    }}\n"
 t, th, toks, _ = out[longest]
 (ROOT / "test/Am3n.t.sol").write_text(f"""// SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
@@ -187,6 +201,8 @@ import {{Am3n}} from "../src/Am3n.sol";
 interface Vm {{
     function etch(address target, bytes calldata code) external;
     function readFileBinary(string calldata path) external view returns (bytes memory);
+    function deal(address who, uint256 amount) external;
+    function warp(uint256 timestamp) external;
 }}
 
 contract Am3nTest {{
@@ -238,4 +254,8 @@ contract Am3nTest {{
 """)
 for t, th, toks, text in out:
     print(f"{THEMES[th]:10} {t[:14]:14} {len(toks) - 1:2d} words -> {text}")
+for (w, bal, code) in wallets:
+    _, text, th = bless_address(q, voc, w, bal, code, T0)
+    print(f"{'wallet':10} {THEMES[th]:14}          -> {text}")
+print(f"{'today':10} {'':14}          -> {day[1]}")
 print(f"{PARAMS:,} parameters, {len(blob):,} bytes in {len(addrs)} parts (resident {RES:,}); wrote src/Weights.sol, test/Am3n.t.sol")
