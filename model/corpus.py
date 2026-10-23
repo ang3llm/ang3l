@@ -75,13 +75,83 @@ COMMON = ["may {thing} {wish} .", "may {thing} {wish} {when} .", "{name} , may {
           "i bless {thing} with {gift} and {gift} .", "go with {gift} , {noun} .", "{name} , you are {good} and {good} .",
           "you are {good} , {noun} ; {light} {verb} .", "{gift} for {thing} , {name} .",
           "rest now , {name} ; {thing} will {wish} .", "may {gift} find you {when} , {name} .",
-          "even {hard} , {light} {verb} .", "may your {gift} be {good} {when} .", "{name} , {light} {verb} {when} .",
+          "even {hard} , {light} {verb} .", "{name} , {light} {verb} {when} .",
           "be {good} , be {good} , {name} .", "{gift} and {gift} to you , {noun} ."]
+
+# hand-written blessings: whole sentences with at most a name or a noun slot, so the model also learns to sound
+# like a person and not only like a grammar
+HAND = {
+    "<builder>": [
+        "may your next deploy be boring and safe .", "the bug you fear is smaller than you think .",
+        "ship it , {name} ; the world is waiting .", "your first user is already on the way .",
+        "{name} , your work is seen .", "sleep on it ; the fix comes at dawn .",
+        "may your tests be green and your mind quiet .", "build the thing you wish existed .",
+        "small steps , {name} , still count .", "the code remembers every careful line .",
+        "may your contract hold when the market shakes .", "you started with nothing , and look now .",
+        "may your launch day be kind to you .", "every great build was once a bad draft .",
+        "{name} , keep the faith in your idea .", "the hard part is behind you , {noun} .",
+        "may your gas stay low and your vision high .", "one more commit , {name} , then rest .",
+        "your hands are building something that lasts .", "the chain will keep your work for years .",
+        "may the audit find nothing but care .", "be proud of today , {noun} .",
+        "the users you need will find you .", "may your build compile on the first try .",
+        "{name} , the best version is still ahead .", "go slow , ship well , {noun} .",
+        "may every block confirm what you believe .", "rest your eyes ; the code will wait .",
+        "{name} , you were made to build .", "what you make today will help someone tomorrow ."],
+    "<holder>": [
+        "your keys , your peace , your choice .", "may your wallet stay safe while you sleep .",
+        "{name} , the dip is not the end .", "breathe ; the chart is not your heart .",
+        "may patience pay you back in full .", "hold what you believe , {noun} .",
+        "the noise will pass ; your conviction stays .", "{name} , red days teach the quiet ones .",
+        "may your seed phrase stay where only you know .", "you held when it was hard , {name} .",
+        "green candles come to those who wait .", "may you never sell in fear .",
+        "your hope is heavier than any bag .", "the market sleeps ; you should too , {name} .",
+        "may every wallet you trust deserve it .", "{name} , zoom out and smile .",
+        "calm hands , full heart , {noun} .", "may your next block bring good news .",
+        "the storm passes ; the holders remain .", "{name} , your patience is a quiet strength .",
+        "no panic , no rush , only peace .", "may the chart be kind to you this week .",
+        "you are early , {name} ; be gentle .", "may your keys never leave your hands .",
+        "hold on , {noun} ; morning always comes .", "the long game rewards the calm heart .",
+        "know when to rest and when to hold .", "{name} , your faith was never wasted .",
+        "may your gains be quiet and your nights long .", "steady now , {noun} ; the light stays ."],
+    "<night>": [
+        "close the charts , {name} ; look up .", "the chain keeps turning ; you may rest .",
+        "sleep well , {name} ; nothing needs you now .", "may your dreams be softer than today .",
+        "the screen can wait until morning .", "let the night carry what you cannot .",
+        "{name} , the moon is keeping watch .", "rest now ; tomorrow you begin again .",
+        "may your sleep be deep and your waking kind .", "put the phone down , {noun} ; breathe .",
+        "the blocks will wait for you , {name} .", "may the quiet hours be gentle with you .",
+        "even angels rest , {name} .", "dream of good things , {noun} .",
+        "the world is quiet ; so is your heart .", "may nothing wake you before the sun .",
+        "{name} , you did enough today .", "let go of the day , {noun} .",
+        "the stars are counting your good deeds .", "may your pillow be cool and your mind still .",
+        "goodnight , {name} ; the light stays on .", "sleep , {noun} ; the morning knows your name .",
+        "may you wake rested and unafraid .", "the night is long , but it is kind .",
+        "{name} , close your eyes ; you are safe .", "may the dark be soft around you .",
+        "rest , {noun} ; the chain will hold .", "tonight , let your worries sleep first .",
+        "may your dreams find their way home .", "the quiet is a gift , {name} ."],
+    "<friend>": [
+        "hello , {name} ; glad you are here .", "you are doing better than you think .",
+        "may your day be lighter than your worries .", "{name} , someone is thankful for you today .",
+        "drink some water and be kind to yourself .", "may your table always have room for friends .",
+        "you matter more than you know , {name} .", "may your road be gentle and your shoes dry .",
+        "{name} , you are not alone in this .", "take a breath ; the day is still yours .",
+        "may someone make you laugh today .", "your kindness comes back to you , {noun} .",
+        "{name} , the world is better with you .", "may your family be well and your home warm .",
+        "a small good thing is coming your way .", "be gentle with yourself today , {name} .",
+        "may your heart feel light by evening .", "thank you for being here , {noun} .",
+        "{name} , today you are exactly enough .", "may good news find you this week .",
+        "you are loved , {name} , even today .", "may your story have a gentle next page .",
+        "someone smiles when they think of you .", "{name} , may your week be easy .",
+        "rest when you can , laugh when you can .", "may the people you love be safe tonight .",
+        "you are a good friend , {name} .", "may your coffee be warm and your day kind .",
+        "go easy , {noun} ; you have done well .", "{name} , the door is always open ."],
+}
 
 
 def line(theme, rng):
     t = BY_THEME[theme]
-    s = rng.choice(COMMON) if rng.random() < 0.7 else rng.choice(t["extra"])
+    u = rng.random()
+    s = rng.choice(HAND[theme]) if u < 0.45 else rng.choice(COMMON) if u < 0.85 else rng.choice(t["extra"])
     pools = (("{thing}", t["thing"]), ("{wish}", t["wish"]), ("{noun}", t["noun"]), ("{hard}", t["hard"]),
              ("{light}", LIGHT), ("{verb}", VERB), ("{good}", GOOD), ("{gift}", GIFT), ("{when}", WHEN))
     while "{" in s:  # fill one slot at a time so a slot used twice gets two picks

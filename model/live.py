@@ -66,7 +66,7 @@ if __name__ == "__main__":
             {"engine": override[TMP]["code"], "parts": {a: v["code"] for a, v in override.items() if a != TMP}}))
     q, voc = load()
     ok = True
-    for words, theme in [("satoshi", 0), ("gm", 1), ("0x8d6b11cfdf079e27c17e05cb7ea81235887691c6", 2), ("mom", 3)]:
+    for words, theme in [("satoshi", 0), ("gm", 1), ("0x8d6b11cfdf079e27c17e05cb7ea81235887691c6", 2), ("mom", 3), ("seed1", 0)]:  # seed1: a 10-token blessing, the worst case
         data = calldata(words, theme)
         r = call(addr, data, 50_000_000, override)
         if "error" in r:

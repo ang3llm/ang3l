@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AM3N</title>
-<meta name="description" content="A 1.22M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
+<meta name="description" content="A 1.24M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
 <meta property="og:title" content="AM3N">
-<meta property="og:description" content="A 1.22M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
+<meta property="og:description" content="A 1.24M-parameter mixture-of-experts transformer on Robinhood Chain. It writes you a whole blessing in one free read call.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,6 +34,7 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+#w-check { overflow-wrap: anywhere; }
 html, body { margin: 0; }
 body {
   background: var(--ground); color: var(--ink); font: 400 16px/1.6 var(--ui);
@@ -124,7 +125,7 @@ footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
 
   <section>
     <h1>An angel that lives on chain.</h1>
-    <p class="lede">A mixture-of-experts transformer with 1,221,504 weights stored on Robinhood Chain. Ask it, or hand it a wallet, and it writes a whole blessing inside one read call: no transaction, no gas from you, the same words from any node.</p>
+    <p class="lede">A mixture-of-experts transformer with 1,239,424 weights stored on Robinhood Chain. Ask it, or hand it a wallet, and it writes a whole blessing inside one read call: no transaction, no gas from you, the same words from any node.</p>
   </section>
 
   <section class="today" aria-live="polite">
@@ -175,8 +176,8 @@ footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
   </section>
 
   <section class="facts">
-    <div><strong>1,221,504</strong><span>int8 weights on chain, 8 experts in each of 2 layers</span></div>
-    <div><strong>302k</strong><span>weights a word actually touches: a router picks one expert</span></div>
+    <div><strong>1,239,424</strong><span>int8 weights on chain, 8 experts in each of 2 layers</span></div>
+    <div><strong>320k</strong><span>weights a word actually touches: a router picks one expert</span></div>
     <div><strong>1 call</strong><span>a whole blessing per eth_call, under the 50M gas read limit</span></div>
     <div><strong>0</strong><span>transactions, servers or keys between you and the chain</span></div>
   </section>
@@ -214,6 +215,8 @@ cast call ADDRESS "today()(string)" \
       <h2 style="margin-top:24px">Where the weights live</h2>
       <p class="note">Each data contract was created through the standard CREATE2 deployer (0x4e59…956C, salt 0), so its address is derived from the hash of the exact bytes it holds. A different weight cannot sit at these addresses.</p>
       <ul class="parts" id="parts"></ul>
+      <div class="row" style="margin-top:14px"><button class="ghost" id="check" type="button">Check the weights</button></div>
+      <p class="note" id="w-check" aria-live="polite">Your browser asks the engine for its parts, reads every one from the chain, recomputes each CREATE2 address from the bytes it finds, and hashes the whole weight stream. Expected keccak256: <span id="w-hash" style="font-family:var(--chain);overflow-wrap:anywhere">…</span></p>
     </div>
   </section>
 
@@ -411,13 +414,48 @@ async function wall() {
 }
 if (TOKEN) wall().catch(() => {});
 
-fetch("parts.json").then(r => r.json()).then(list => {
-  for (const a of list) {
+const DEPLOYER = "4e59b44847b379578588920ca78fbf26c0b4956c";
+const bytesOf = h => Uint8Array.from((h.replace(/^0x/, "").match(/../g) || []).map(x => parseInt(x, 16)));
+let manifest = null;
+fetch("parts.json").then(r => r.json()).then(m => {
+  manifest = m;
+  $("w-hash").textContent = m.keccak;
+  for (const a of m.parts) {
     const li = document.createElement("li");
     li.innerHTML = `<a href="${EXPLORER}${a}" rel="noopener">${a.slice(0, 10)}…${a.slice(-6)}</a>`;
     $("parts").append(li);
   }
 }).catch(() => {});
+
+// engine -> parts -> bytes -> hash, all from the chain, nothing taken from this page except the expected hash
+$("check").onclick = async () => {
+  const say = t => { $("w-check").textContent = t; };
+  try {
+    let list = manifest.parts;
+    if (ADDRESS) {
+      const r = await rpc("eth_call", [{ to: ADDRESS, data: "0x" + sel("parts()") }, "latest"]);
+      const n = parseInt(r.slice(2 + 64, 2 + 128), 16);
+      list = Array.from({ length: n }, (_, i) => "0x" + r.slice(2 + 128 + i * 64 + 24, 2 + 128 + (i + 1) * 64));
+    }
+    const chunks = [];
+    for (const [i, a] of list.entries()) {
+      say(`reading part ${i + 1} of ${list.length}…`);
+      const code = await rpc("eth_getCode", [a, "latest"]);
+      if (code === "0x") return say(`part ${i + 1} (${a}) is not on chain yet: the weights have not been deployed.`);
+      const run = code.slice(2), len = (run.length / 2).toString(16).padStart(6, "0");
+      const init = "62" + len + "80600d6000396000f3" + run;
+      const addr = "0x" + keccak256(bytesOf("ff" + DEPLOYER + "0".repeat(64) + keccak256(bytesOf(init)))).slice(24);
+      if (addr !== a.toLowerCase()) return say(`part ${i + 1}: the address does not match its bytes.`);
+      chunks.push(bytesOf(run.slice(2)));                    // drop the STOP byte
+    }
+    const total = chunks.reduce((n, c) => n + c.length, 0), all = new Uint8Array(total);
+    chunks.reduce((at, c) => (all.set(c, at), at + c.length), 0);
+    const h = "0x" + keccak256(all);
+    say(h === manifest.keccak
+      ? `${list.length} parts${ADDRESS ? " listed by the engine" : ""}, every address derived from its own bytes, ${total.toLocaleString("en-US")} bytes hashing to ${h}: the same weights as the repository.`
+      : `the weight stream hashes to ${h}, not ${manifest.keccak}.`);
+  } catch (err) { say("the chain did not answer: " + err.message); }
+};
 
 if (ADDRESS) {
   $("cmd").textContent = $("cmd").textContent.replaceAll("ADDRESS", ADDRESS);

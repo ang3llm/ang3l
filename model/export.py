@@ -83,7 +83,9 @@ for i in range(0, len(blob), CHUNK):
     (ROOT / f"parts/{len(addrs):02d}.bin").write_bytes(init)
     addrs.append(k256(b"\xff" + bytes.fromhex(DEPLOYER) + SALT + k256(init))[12:])
 
-(ROOT / "docs/parts.json").write_text(json.dumps(["0x" + a.hex() for a in addrs]))
+WEIGHTS_KECCAK = "0x" + k256(blob).hex()             # what the page and the README check the chain against
+(ROOT / "docs/parts.json").write_text(json.dumps({"parts": ["0x" + a.hex() for a in addrs], "bytes": len(blob),
+                                                  "keccak": WEIGHTS_KECCAK}))
 PARAMS = V * D + T * D + D + L * (2 * D + 4 * D * D + NX * D + NX * 2 * F * D)
 vbytes, voff = bytearray(), [0]
 for tok in voc:
@@ -225,6 +227,13 @@ contract Am3nTest {{
         a = new Am3n();
     }}
 
+    function test_parts() public view {{
+        address[] memory p = a.parts();
+        bytes20[{len(addrs)}] memory want = [{", ".join(f'bytes20(hex"{x.hex()}")' for x in addrs)}];
+        require(p.length == {len(addrs)}, "parts length");
+        for (uint256 i; i < p.length; ++i) require(bytes20(p[i]) == want[i], "parts");
+    }}
+
     function test_parameters() public view {{
         require(a.parameters() == {PARAMS}, "parameters");
     }}
@@ -258,4 +267,5 @@ for (w, bal, code) in wallets:
     _, text, th = bless_address(q, voc, w, bal, code, T0)
     print(f"{'wallet':10} {THEMES[th]:14}          -> {text}")
 print(f"{'today':10} {'':14}          -> {day[1]}")
+print(f"weights keccak {WEIGHTS_KECCAK}")
 print(f"{PARAMS:,} parameters, {len(blob):,} bytes in {len(addrs)} parts (resident {RES:,}); wrote src/Weights.sol, test/Am3n.t.sol")

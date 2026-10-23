@@ -57,6 +57,18 @@ contract Am3n {
         lg = _head(c, x);
     }
 
+    /// @notice The data contracts holding the weights, in stream order. Each was created through the CREATE2
+    /// deployer 0x4e59b44847b379578588920cA78FbF26c0B4956C with salt 0, so its address commits to its bytes.
+    function parts() external pure returns (address[] memory a) {
+        bytes memory p = PARTS;
+        a = new address[](p.length / 20);
+        for (uint256 i; i < a.length; ++i) {
+            address x;
+            assembly { x := shr(96, mload(add(add(p, 32), mul(i, 20)))) }
+            a[i] = x;
+        }
+    }
+
     /// @notice Number of weights in the model, every expert counted.
     function parameters() external pure returns (uint256) {
         return PARAMS;

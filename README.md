@@ -1,6 +1,6 @@
 # AM3N
 
-A mixture-of-experts transformer that lives on Robinhood Chain (chain id 4663). Its 1,221,504 int8 weights
+A mixture-of-experts transformer that lives on Robinhood Chain (chain id 4663). Its 1,239,424 int8 weights
 are stored on chain, and the engine contract runs the whole model: ask it, or hand it a wallet, and it writes
 a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the same words from any node.
 
@@ -22,18 +22,19 @@ cast call <ADDRESS> "today()(string)" --rpc-url https://rpc.mainnet.chain.robinh
   0.1 ETH or more the holder's, an empty wallet the night's, anything else the friend's. The seed is the
   wallet and the UTC day, so the words change once a day.
 - `today()`: one blessing for everyone, new at 00:00 UTC.
-- `logits(tokens)` and `generate(words, theme)` expose the raw forward pass and the token ids.
+- `logits(tokens)` and `generate(words, theme)` expose the raw forward pass and the token ids; `parts()` lists
+  the weight contracts.
 
 ## Numbers
 
 | | |
 |---|---|
-| Weights | 1,221,504 int8 (every expert counted), 1,230,976 bytes in 14 data contracts |
+| Weights | 1,239,424 int8 (every expert counted), 1,247,360 bytes in 15 data contracts, keccak256 `0x51cc9ae0514c7b199cb15c97844133b9b08bb13771c44d70266fdc551884a7e2` |
 | Architecture | decoder-only transformer, 2 layers, width 128, 4 heads of 32; each layer's MLP is 8 experts of width 256 with a top-1 router; tied embeddings |
-| Weights a word touches | 301,824: the router runs one expert per layer, the other seven are never read |
-| Vocabulary / longest blessing | 294 tokens / 10 tokens |
-| Engine | 12,270 bytes |
-| Gas per blessing | 28M to 32M measured on the public RPC; 38.8M for the longest possible output |
+| Weights a word touches | 319,744: the router runs one expert per layer, the other seven are never read |
+| Vocabulary / longest blessing | 434 tokens / 10 tokens |
+| Engine | 13,581 bytes |
+| Gas per blessing | 29M to 37M measured on the public RPC; 40.8M for the longest possible output (10 tokens) |
 | Read-call limit on the public RPC | 50M gas |
 
 ## How it works
@@ -44,7 +45,7 @@ Every operation is integer math, so the contract and the Python reference agree 
    STOP byte keeps data from ever running). Each was created through the standard CREATE2 deployer
    `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt 0, so its address is derived from the hash of the
    exact bytes it holds; the engine has those addresses as constants. Embeddings, attention and routers
-   (182,400 bytes) are copied into memory once per call; for each word and layer only the expert the router
+   (198,784 bytes) are copied into memory once per call; for each word and layer only the expert the router
    picks is copied in.
 2. **Packed matrix kernel.** Weights are stored as `w + 128`, one 32-byte word per input column for a block of
    32 output rows. Shifting the word by 0, 8, 16 and 24 bits and masking one byte into each 32-bit lane gives 8
@@ -59,8 +60,12 @@ Every operation is integer math, so the contract and the Python reference agree 
 
 ## Verify
 
+The page's "Check the weights" button does this from any browser: it asks the engine for `parts()`, reads every
+part with `eth_getCode`, recomputes each CREATE2 address from the bytes it finds, and hashes the whole stream
+against the keccak256 above.
+
 ```
-forge test                          # 17 tests: blessings, wallets, the daily blessing, two full logit vectors
+forge test                          # 18 tests: blessings, wallets, the daily blessing, the parts, two full logit vectors
 python model/live.py                # before deployment: engine + all parts injected with a state override
 python model/live.py <ADDRESS>      # after deployment: chain output vs the Python reference, with gas
 ```
@@ -81,7 +86,7 @@ forge test
 repeatable, so the weights themselves are committed and everything else (`parts/`, `src/Weights.sol`, the
 tests) is generated from them by `export.py`; each part's CREATE2 address then proves the chain holds exactly
 these bytes. The training data is synthetic: `model/corpus.py` generates
-80,000 short blessings from a grammar. No outside text is used. `deploy.py` deploys the parts and the
+80,000 short blessings: 120 hand-written sentences and a grammar around them. No outside text is used. `deploy.py` deploys the parts and the
 engine (it shows the cost and asks first).
 
 ## Limits
