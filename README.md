@@ -5,14 +5,14 @@ are stored on chain, and the engine contract runs the whole model: ask it, or ha
 a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the same words from any node.
 
 ```
-cast call <ADDRESS> "bless(string,uint256)(string)" "satoshi" 2 \
+cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "bless(string,uint256)(string)" "satoshi" 2 \
   --rpc-url https://rpc.mainnet.chain.robinhood.com
 # the chain keeps turning; rest, satoshi.
 
-cast call <ADDRESS> "blessAddress(address)(string,uint256)" 0xYOURWALLET \
+cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "blessAddress(address)(string,uint256)" 0xYOURWALLET \
   --rpc-url https://rpc.mainnet.chain.robinhood.com
 
-cast call <ADDRESS> "today()(string)" --rpc-url https://rpc.mainnet.chain.robinhood.com
+cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "today()(string)" --rpc-url https://rpc.mainnet.chain.robinhood.com
 ```
 
 - `bless(words, theme)`: `theme` is 0 builder, 1 holder, 2 night, 3 friend. `words` seeds the sampler and is
@@ -24,6 +24,13 @@ cast call <ADDRESS> "today()(string)" --rpc-url https://rpc.mainnet.chain.robinh
 - `today()`: one blessing for everyone, new at 00:00 UTC.
 - `logits(tokens)` and `generate(words, theme)` expose the raw forward pass and the token ids; `parts()` lists
   the weight contracts.
+
+## Deployed
+
+| | |
+|---|---|
+| Engine | [`0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811`](https://robinhoodchain.blockscout.com/address/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811), source verified on [Sourcify](https://repo.sourcify.dev/4663/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811) (exact match) |
+| Weights | 15 data contracts, listed by `parts()` and in [`docs/parts.json`](docs/parts.json) |
 
 ## Numbers
 
@@ -67,7 +74,7 @@ against the keccak256 above.
 ```
 forge test                          # 18 tests: blessings, wallets, the daily blessing, the parts, two full logit vectors
 python model/live.py                # before deployment: engine + all parts injected with a state override
-python model/live.py <ADDRESS>      # after deployment: chain output vs the Python reference, with gas
+python model/live.py 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811      # after deployment: chain output vs the Python reference, with gas
 ```
 
 `test/Am3n.t.sol` is generated from the reference. Its setup deploys every part through the same CREATE2

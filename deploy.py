@@ -5,7 +5,7 @@
 Parts already on chain (anyone may deploy them; the address pins the bytes) are skipped, so a run that
 stops halfway can simply be started again. Needs Foundry's `cast` and `forge`.
 """
-import json, os, subprocess, sys, urllib.request
+import json, re, subprocess, sys, urllib.request
 from pathlib import Path
 from Crypto.Hash import keccak
 
@@ -31,8 +31,17 @@ def env_key():
     sys.exit("PRIVATE_KEY missing in .env")
 
 
+def run(cmd, **kw):
+    """Runs a Foundry command. On failure it exits with the tool's own message, long hex runs hidden: never the
+    command line, which carries the private key."""
+    r = subprocess.run(cmd, capture_output=True, text=True, **kw)
+    if r.returncode:
+        sys.exit("failed: " + re.sub(r"(0x)?[0-9a-fA-F]{40,}", "<hex>", (r.stderr or r.stdout).strip())[-800:])
+    return r.stdout.strip()
+
+
 def cast(*args):
-    return subprocess.run(["cast", *args], check=True, capture_output=True, text=True).stdout.strip()
+    return run(["cast", *args])
 
 
 if __name__ == "__main__":
@@ -61,8 +70,7 @@ if __name__ == "__main__":
         cast("send", DEPLOYER, data, "--private-key", key, "--rpc-url", RPC, "--gas-limit", str(gas * 12 // 10))
         assert rpc("eth_getCode", [addr, "latest"]) != "0x", f"{name} did not land at {addr}"
         print(f"{name}  {addr}  deployed")
-    out = subprocess.run(["forge", "create", "src/Am3n.sol:Am3n", "--broadcast", "--rpc-url", RPC, "--private-key", key],
-                         cwd=ROOT, check=True, capture_output=True, text=True).stdout
+    out = run(["forge", "create", "src/Am3n.sol:Am3n", "--broadcast", "--rpc-url", RPC, "--private-key", key], cwd=ROOT)
     engine = next(l.split()[-1] for l in out.splitlines() if l.startswith("Deployed to:"))
     print(f"\nengine: {engine}")
     print("next: put it in docs/index.html (const ADDRESS), then run")

@@ -161,7 +161,7 @@ footer a, .note a { color: var(--ink); text-underline-offset: 3px; }
       </div>
       <div class="receipt" aria-live="polite">
         <div><span>call</span><span id="r-call">bless("gm", 2)</span></div>
-        <div><span>gas</span><span id="r-gas">-</span></div>
+        <div><span>gas</span><span id="r-gas">29M to 41M measured</span></div>
         <div><span>block</span><span id="r-block">-</span></div>
         <div><span>transactions</span><span>0</span></div>
         <div><span>cost to you</span><span>$0.00</span></div>
@@ -232,7 +232,7 @@ cast call ADDRESS "today()(string)" \
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha3/0.8.0/sha3.min.js"></script>
 <script>
 const RPC = "https://rpc.mainnet.chain.robinhood.com";
-const ADDRESS = "";                       // the engine, set after deployment
+const ADDRESS = "0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811"; // the engine on Robinhood Chain
 const TOKEN = "";                         // the token, set after launch: turns on the holder wall
 const REPO = "";                          // set when the repository is public
 const SITE = location.origin + location.pathname;
@@ -277,9 +277,7 @@ async function call(data) {
   }
   const tx = { to: ADDRESS || PREVIEW, data, gas: "0x2faf080" };
   const [res, block] = await Promise.all([rpc("eth_call", [tx, "latest", ...extra]), rpc("eth_blockNumber", [])]);
-  let gas = null;
-  try { gas = parseInt(await rpc("eth_estimateGas", [tx, "latest", ...extra]), 16); } catch (e) {}
-  return { res, block: parseInt(block, 16), gas };
+  return { res, block: parseInt(block, 16) };       // no eth_estimateGas: on this chain it adds L1 posting and refuses
 }
 
 const bless = (words, theme) => call("0x" + sel("bless(string,uint256)") + word(64) + word(theme) + strArg(words));
@@ -341,10 +339,10 @@ $("ask").addEventListener("submit", async e => {
     const out = await job;
     const text = strAt(out.res, 0);
     $("blessing").textContent = text;
-    $("r-gas").textContent = out.gas ? out.gas.toLocaleString("en-US") : "under 50,000,000";
+    $("r-gas").textContent = "29M to 41M measured, under the 50M read limit";
     $("r-block").textContent = out.block.toLocaleString("en-US");
     $("status").textContent = ADDRESS ? "from the contract, just now" : "preview: compiled code run on the live chain";
-    last = { text, block: out.block, gas: out.gas, call: label };
+    last = { text, block: out.block, call: label };
     $("share").disabled = false;
   } catch (err) {
     $("status").textContent = "the chain did not answer: " + err.message + ". Try again in a moment.";
