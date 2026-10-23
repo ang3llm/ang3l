@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ANG3L marks</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  body { margin: 0; background: #222; display: grid; gap: 20px; padding: 20px; justify-items: start; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<!-- Renders the token logo (also the X avatar) and the X banner; brand/make.cjs screenshots them. -->
+<canvas id="logo" width="1024" height="1024"></canvas>
+<canvas id="banner" width="1500" height="500"></canvas>
+<script>
+const NIGHT = "#0b0f19", GOLD = "#e2c27a", INK = "#e8ecf4", MUTED = "#9aa3b5";
+
+function halo(ctx, cx, cy, rx, ry, w) {
+  // a thin tilted ring, drawn three times with falling alpha for depth (no glow, no gradient sheen)
+  for (const [a, dw] of [[0.1, w * 3.2], [0.28, w * 1.8], [1, w]]) {
+    ctx.globalAlpha = a; ctx.strokeStyle = GOLD; ctx.lineWidth = dw;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, -0.12, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function stars(ctx, W, H, n, seed) {
+  let s = seed;
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < n; i++) {
+    ctx.globalAlpha = 0.15 + rnd() * 0.35; ctx.fillStyle = INK;
+    ctx.beginPath(); ctx.arc(rnd() * W, rnd() * H, rnd() * 1.6 + 0.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// canvas text does not make the browser fetch a web font, so load each face before drawing
+Promise.all(["500 560px 'Cormorant Garamond'", "italic 500 72px 'Cormorant Garamond'", "400 22px 'IBM Plex Mono'"]
+  .map(f => document.fonts.load(f))).then(() => {
+  // token logo: halo over a large oldstyle 3, all inside the circle a round crop keeps
+  let c = document.getElementById("logo").getContext("2d");
+  c.fillStyle = NIGHT; c.fillRect(0, 0, 1024, 1024);
+  stars(c, 1024, 1024, 70, 7);
+  halo(c, 512, 290, 250, 64, 7);
+  c.fillStyle = INK; c.textAlign = "center"; c.textBaseline = "alphabetic";
+  c.font = "500 560px 'Cormorant Garamond'";
+  c.fillText("3", 512, 735);
+
+  // X banner: halo and the one-line thesis, receipts in mono
+  c = document.getElementById("banner").getContext("2d");
+  c.fillStyle = NIGHT; c.fillRect(0, 0, 1500, 500);
+  stars(c, 1500, 500, 110, 11);
+  halo(c, 1170, 150, 170, 44, 5);
+  c.textAlign = "left";
+  c.fillStyle = INK; c.font = "italic 500 72px 'Cormorant Garamond'";
+  c.fillText("an angel that lives", 120, 250);
+  c.fillText("in one contract.", 120, 330);
+  c.fillStyle = MUTED; c.font = "400 22px 'IBM Plex Mono'";
+  c.fillText("1 read call  ·  24,064 weights on chain  ·  0 servers", 122, 400);
+  document.body.dataset.ready = "1";
+});
+</script>
+</body>
+</html>

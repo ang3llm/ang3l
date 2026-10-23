@@ -6,4 +6,4 @@ broadcast/
 .env
 .DS_Store
 model/float.pt
-web/ang3l.bin
+docs/ang3l.bin
