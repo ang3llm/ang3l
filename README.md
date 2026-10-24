@@ -1,5 +1,7 @@
 # ANG3L
 
+![ANG3L: AM3N, BL3SS and T3ACH on Robinhood Chain](brand/x-banner-1500x500.png)
+
 An angel that lives on Robinhood Chain (chain id 4663). Its model, AM3N, is a mixture-of-experts transformer
 whose 1,239,424 int8 weights are stored on chain, and the engine contract runs the whole model: ask it, or hand
 it a wallet, and it writes a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the
@@ -13,6 +15,8 @@ contract `Am3n`.
 | Site | [ang3l.ink](https://ang3l.ink/) |
 | X | [@ang3llm](https://x.com/ang3llm) |
 | Source | [github.com/ang3llm/ang3l](https://github.com/ang3llm/ang3l) |
+| Research | [research/](research/): one numbered folder per experiment, starting with [the packed kernel](research/001-packed-kernel/) |
+| Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ```
 cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "bless(string,uint256)(string)" "satoshi" 2 \
