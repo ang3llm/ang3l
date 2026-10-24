@@ -1,13 +1,23 @@
-# AM3N
+# ANG3L
 
-A mixture-of-experts transformer that lives on Robinhood Chain (chain id 4663). Its 1,239,424 int8 weights
-are stored on chain, and the engine contract runs the whole model: ask it, or hand it a wallet, and it writes
-a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the same words from any node.
+An angel that lives on Robinhood Chain (chain id 4663). Its model, AM3N, is a mixture-of-experts transformer
+whose 1,239,424 int8 weights are stored on chain, and the engine contract runs the whole model: ask it, or hand
+it a wallet, and it writes a whole blessing inside one `eth_call`. No transaction, no gas paid by anyone, the
+same words from any node.
+
+ANG3L is the project and its token, **$ANG3L**. AM3N is ANG3L's model: the transformer on chain, run by the engine
+contract `Am3n`.
+
+| | |
+|---|---|
+| Site | [ang3l.ink](https://ang3l.ink/) |
+| X | [@ang3llm](https://x.com/ang3llm) |
+| Source | [github.com/ang3llm/ang3l](https://github.com/ang3llm/ang3l) |
 
 ```
 cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "bless(string,uint256)(string)" "satoshi" 2 \
   --rpc-url https://rpc.mainnet.chain.robinhood.com
-# the chain keeps turning; rest, satoshi.
+# the blocks will wait for you, satoshi.
 
 cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "blessAddress(address)(string,uint256)" 0xYOURWALLET \
   --rpc-url https://rpc.mainnet.chain.robinhood.com
@@ -25,11 +35,24 @@ cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "today()(string)" --rpc-url
 - `logits(tokens)` and `generate(words, theme)` expose the raw forward pass and the token ids; `parts()` lists
   the weight contracts.
 
+## On the site
+
+[`docs/index.html`](docs/index.html) is the whole site, one file that asks the chain from the visitor's browser with
+reads only (`eth_call`, `eth_blockNumber`, `eth_getCode`, `eth_getLogs`).
+
+- **Ask**: a name in one of the four moods, or a wallet. The answer comes with a share card, a post to X and a link.
+- **Links to a blessing**: `https://ang3l.ink/?bless=satoshi&mood=2` or `https://ang3l.ink/?wallet=0x…`. The page
+  checks the input and asks the chain again when it opens, so the words are always the chain's own, never a copy.
+- **Follow the call**: a live trace of the visitor's own call. The browser computes the seed (keccak256 of the
+  words, or of the wallet and the UTC day), calls `generate(string,uint256)`, shows the token ids one by one with
+  their words from the 434-token vocabulary, and joins them exactly as the contract does.
+- **Check the weights**: re-derives every part's CREATE2 address from its bytes and hashes the stream (below).
+
 ## Deployed
 
 | | |
 |---|---|
-| Engine | [`0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811`](https://robinhoodchain.blockscout.com/address/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811), source verified on [Sourcify](https://repo.sourcify.dev/4663/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811) (exact match) |
+| Engine (AM3N) | [`0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811`](https://robinhoodchain.blockscout.com/address/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811), source verified on [Sourcify](https://repo.sourcify.dev/4663/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811) (exact match) |
 | Weights | 15 data contracts, listed by `parts()` and in [`docs/parts.json`](docs/parts.json) |
 
 ## Numbers
@@ -98,7 +121,7 @@ engine (it shows the cost and asks first).
 
 ## Limits
 
-The model writes short blessings in four moods. It does not answer questions or follow instructions, and it
+AM3N writes short blessings in four moods. It does not answer questions or follow instructions, and it
 knows nothing beyond its corpus. The words come from a grammar, so they are simple; the point is that every
 one of them is computed on chain, for free, by anyone.
 
