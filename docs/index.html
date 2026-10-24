@@ -536,10 +536,10 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
 /* a new buyer's note unrolls from its top edge, like the banderole */
 .hn.unroll { animation: unroll .9s cubic-bezier(.2, .7, .2, 1) both; }
 @keyframes unroll { from { clip-path: inset(0 0 100% 0); opacity: 0; translate: 0 -8px; } to { clip-path: inset(0 0 0 0); opacity: 1; translate: none; } }
-.halo-empty { margin: 0; padding: clamp(22px, 2.6vw, 34px); text-align: center; color: var(--muted); font: italic 400 clamp(1.3rem, 1.1rem + .7vw, 1.8rem)/1.35 var(--serif); text-wrap: balance; }
-.halo-empty a { color: var(--hi); text-decoration: none; border-bottom: 1px solid var(--line2); white-space: nowrap; }
-.halo-empty a span { font-family: var(--mono); font-style: normal; font-size: .8em; }
-.wall:not(:empty) + .halo-empty { display: none; }
+.bl3ss-empty { margin: 0; padding: clamp(22px, 2.6vw, 34px); text-align: center; color: var(--muted); font: italic 400 clamp(1.3rem, 1.1rem + .7vw, 1.8rem)/1.35 var(--serif); text-wrap: balance; }
+.bl3ss-empty a { color: var(--hi); text-decoration: none; border-bottom: 1px solid var(--line2); white-space: nowrap; }
+.bl3ss-empty a span { font-family: var(--mono); font-style: normal; font-size: .8em; }
+.wall:not(:empty) + .bl3ss-empty { display: none; }
 @media (max-width: 1100px) { .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .wall { grid-template-columns: minmax(0, 1fr); } }
 
@@ -606,7 +606,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
     <a class="brand" href="#top" aria-label="ANG3L, home"><span id="nav-mark" aria-hidden="true"></span><b>ANG3L</b></a>
     <button class="ca-pill" id="ca-pill" type="button" hidden></button>
     <nav class="navlinks" id="navlinks" aria-label="Sections">
-      <a href="#ask">Ask</a><a href="#am3n">AM3N</a><a href="#halo">HALO</a><a href="#how">How it works</a><a href="#proof">Proof</a><a href="#verify">Verify</a><a href="#roadmap">Roadmap</a><a href="#links">Links</a>
+      <a href="#ask">Ask</a><a href="#am3n">AM3N</a><a href="#bl3ss">BL3SS</a><a href="#how">How it works</a><a href="#proof">Proof</a><a href="#verify">Verify</a><a href="#roadmap">Roadmap</a><a href="#links">Links</a>
     </nav>
     <span class="nav-end">
       <a class="icon-link" id="nav-x" href="https://x.com/ang3llm" target="_blank" rel="noopener" aria-label="ANG3L on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
@@ -926,17 +926,17 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   </div>
 </section>
 
-<!-- HALO: every buyer of the token, blessed by the model. Before TOKEN is set it says when it opens; after, the newest
+<!-- BL3SS: every buyer of the token, blessed by the model. Before TOKEN is set it says when it opens; after, the newest
      eight buyers, then new ones as they come -->
-<section class="sec" id="halo" aria-labelledby="h-halo">
+<section class="sec" id="bl3ss" aria-labelledby="h-bl3ss">
   <div class="wrap">
-    <div class="sec-top rv"><span class="lab"><b>09</b> · HALO</span></div>
+    <div class="sec-top rv"><span class="lab"><b>09</b> · BL3SS</span></div>
     <div class="sec-head rv">
-      <h2 id="h-halo">HALO. <em>Every buyer, blessed.</em></h2>
+      <h2 id="h-bl3ss">BL3SS. <em>Every buyer, blessed.</em></h2>
       <p class="lede">Every wallet that buys $ANG3L gets its own blessing from AM3N, chosen by what the wallet holds. One free read call per wallet: no special pool, no extra gas on your trade.</p>
     </div>
     <div class="wall" id="wall" aria-live="polite"></div>
-    <p class="halo-empty panel rv" id="halo-empty"><span id="halo-say">HALO opens the minute $ANG3L is issued. Until then,</span> <a href="#ask" id="halo-up">bless any wallet above <span aria-hidden="true">↑</span></a></p>
+    <p class="bl3ss-empty panel rv" id="bl3ss-empty"><span id="bl3ss-say">BL3SS opens the minute $ANG3L is issued. Until then,</span> <a href="#ask" id="bl3ss-up">bless any wallet above <span aria-hidden="true">↑</span></a></p>
   </div>
 </section>
 
@@ -1861,7 +1861,7 @@ void main() {
 document.documentElement.classList.add("js");
 const RPC = "https://rpc.mainnet.chain.robinhood.com";
 const ADDRESS = "0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811"; // the engine on Robinhood Chain
-const TOKEN = "";                         // the token, set after launch: shows the CA and turns HALO's live wall on
+const TOKEN = "";                         // the token, set after launch: shows the CA and turns BL3SS's live wall on
 const REPO = "https://github.com/ang3llm/ang3l";
 const XURL = "https://x.com/ang3llm";
 const DEPLOYER_WALLET = "0x7Cfd8b2f3EF62656285E508F3A11745DeC8A92Fd"; // sent all 16 deploy txs; together they cost the 0.0056 ETH
@@ -2314,7 +2314,7 @@ if ("IntersectionObserver" in window) {
     const a = document.querySelector(`.navlinks a[href="#${e.target.id}"]`);
     if (a) e.isIntersecting ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current");
   }), { rootMargin: "-45% 0px -50% 0px" });
-  ["ask", "am3n", "halo", "how", "proof", "verify", "roadmap", "links"].forEach(id => navIo.observe($(id)));
+  ["ask", "am3n", "bl3ss", "how", "proof", "verify", "roadmap", "links"].forEach(id => navIo.observe($(id)));
 }
 
 function words(el, text, qm = "q") {
@@ -2601,7 +2601,7 @@ const RU = "--rpc-url \\\n  " + RPC;
   $("cmds").append(d);
 });
 
-// ---------- 09. HALO: every buyer, blessed ----------
+// ---------- 09. BL3SS: every buyer, blessed ----------
 // Once the token is set, the newest eight buyers are read and blessed, newest first. The search walks back from the
 // chain's head in chunks that widen while they come back thin (the chain makes about 9.5 blocks a second: a quiet hour
 // is some 34,000 blocks), as far as a week; a chunk the RPC refuses, as it does past its 10,000-log cap, is asked again
@@ -2611,20 +2611,20 @@ const RU = "--rpc-url \\\n  " + RPC;
 // kept at eight. Each note is one blessAddress() read; only a blessed note is shown, and nothing is ever made up.
 const TRANSFER = "0x" + keccak256("Transfer(address,address,uint256)");
 const hex = n => "0x" + n.toString(16);
-const halo = { seen: new Set(), code: new Map(), last: 0, busy: false };
-const isContract = async a => { if (!halo.code.has(a)) halo.code.set(a, (await rpc("eth_getCode", [a, "latest"])) !== "0x"); return halo.code.get(a); };
+const bl3ss = { seen: new Set(), code: new Map(), last: 0, busy: false };
+const isContract = async a => { if (!bl3ss.code.has(a)) bl3ss.code.set(a, (await rpc("eth_getCode", [a, "latest"])) !== "0x"); return bl3ss.code.get(a); };
 // the buyers in these logs (newest first), at most max, each wallet once
 async function buyers(logs, max) {
   const out = [];
   for (const l of logs) {
     const from = "0x" + l.topics[1].slice(26), to = "0x" + l.topics[2].slice(26);
     if (out.length === max) break;
-    if (halo.seen.has(to) || /^0x0{40}$/.test(from) || await isContract(to) || !(await isContract(from))) continue;
-    halo.seen.add(to); out.push(to);
+    if (bl3ss.seen.has(to) || /^0x0{40}$/.test(from) || await isContract(to) || !(await isContract(from))) continue;
+    bl3ss.seen.add(to); out.push(to);
   }
   return out;
 }
-async function haloNote(w, fresh) {
+async function bl3ssNote(w, fresh) {
   const o = await blessAddress(w), p = document.createElement("article"), wall = $("wall");
   p.className = "hn panel" + (fresh && !still ? " unroll" : "");
   p.innerHTML = `<div class="hn-top lab"><span class="nocase">${short(w)}</span><span>${THEMES[parseInt(o.res.slice(66, 130), 16)] || ""}</span></div><q></q>`;
@@ -2632,9 +2632,9 @@ async function haloNote(w, fresh) {
   fresh ? wall.prepend(p) : wall.append(p);
   while (wall.children.length > 8) wall.lastElementChild.remove();
 }
-async function haloFirst() {
+async function bl3ssFirst() {
   const head = parseInt(await rpc("eth_blockNumber", []), 16), floor = Math.max(0, head - 7 * 86400 * 10);
-  halo.last = head;
+  bl3ss.last = head;
   const who = [];
   for (let to = head, span = 2000; who.length < 8 && to > floor;) {
     const from = Math.max(floor, to - span + 1);
@@ -2645,32 +2645,32 @@ async function haloFirst() {
     to = from - 1;
     if (logs.length < 1000) span *= 8;
   }
-  for (const w of who) { try { await haloNote(w, false); } catch (e) { console.warn("halo:", e); } }
+  for (const w of who) { try { await bl3ssNote(w, false); } catch (e) { console.warn("bl3ss:", e); } }
 }
-async function haloPoll() {
-  if (halo.busy || document.visibilityState !== "visible") return;
-  halo.busy = true;
+async function bl3ssPoll() {
+  if (bl3ss.busy || document.visibilityState !== "visible") return;
+  bl3ss.busy = true;
   try {
     const head = parseInt(await rpc("eth_blockNumber", []), 16);
-    if (head <= halo.last) return;
+    if (head <= bl3ss.last) return;
     let logs;
-    try { logs = await rpc("eth_getLogs", [{ address: TOKEN, topics: [TRANSFER], fromBlock: hex(halo.last + 1), toBlock: hex(head) }]); }
+    try { logs = await rpc("eth_getLogs", [{ address: TOKEN, topics: [TRANSFER], fromBlock: hex(bl3ss.last + 1), toBlock: hex(head) }]); }
     catch (e) {
       // ponytail: a refused read is asked again next time, unless the gap (a long hidden tab) is past what one read can
-      // hold: then it is skipped to the head, since the newest buyers are the ones HALO shows
-      if (head - halo.last > 20000) halo.last = head;
+      // hold: then it is skipped to the head, since the newest buyers are the ones BL3SS shows
+      if (head - bl3ss.last > 20000) bl3ss.last = head;
       throw e;
     }
-    halo.last = head;
-    for (const w of (await buyers(logs.reverse(), 4)).reverse()) { try { await haloNote(w, true); } catch (e) { console.warn("halo:", e); } }
-  } catch (e) { console.warn("halo:", e); }
-  finally { halo.busy = false; }
+    bl3ss.last = head;
+    for (const w of (await buyers(logs.reverse(), 4)).reverse()) { try { await bl3ssNote(w, true); } catch (e) { console.warn("bl3ss:", e); } }
+  } catch (e) { console.warn("bl3ss:", e); }
+  finally { bl3ss.busy = false; }
 }
 // before the token: the wallet form, one tap away
-$("halo-up").href = "#ask-panel";
-$("halo-up").addEventListener("click", () => { setMode("wallet"); if (matchMedia("(hover: hover) and (pointer: fine)").matches) setTimeout(() => $("wallet").focus({ preventScroll: true }), 500); });
+$("bl3ss-up").href = "#ask-panel";
+$("bl3ss-up").addEventListener("click", () => { setMode("wallet"); if (matchMedia("(hover: hover) and (pointer: fine)").matches) setTimeout(() => $("wallet").focus({ preventScroll: true }), 500); });
 // ---------- once the token is set: the counterfoil shows its address on one line with a copy button, the nav and the
-// footer carry it too, and HALO is read when the reader nears it ----------
+// footer carry it too, and BL3SS is read when the reader nears it ----------
 if (TOKEN) {
   const copyOn = (btn, label) => { btn.onclick = () => navigator.clipboard.writeText(TOKEN).then(() => flash(btn, "copied", label)).catch(() => {}); };
   $("ca").textContent = TOKEN; $("ca").classList.add("addr");
@@ -2682,10 +2682,10 @@ if (TOKEN) {
   copyOn(pill, pl);
   $("c-ca-v").textContent = TOKEN; $("c-ca").hidden = false; copyOn($("c-ca-copy"), "copy");
   $("f-token").href = SCAN + "token/" + TOKEN; $("f-token").hidden = false;
-  $("halo-say").textContent = "Listening for the first buyers: each new wallet appears here, blessed, within 30 seconds.";
-  $("halo-up").hidden = true;
-  const start = () => haloFirst().catch(e => console.warn("halo:", e)).then(() => setInterval(haloPoll, 30000));
-  if ("IntersectionObserver" in window) { const wio = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { wio.disconnect(); start(); } }, { rootMargin: "1200px 0px" }); wio.observe($("halo")); }
+  $("bl3ss-say").textContent = "Listening for the first buyers: each new wallet appears here, blessed, within 30 seconds.";
+  $("bl3ss-up").hidden = true;
+  const start = () => bl3ssFirst().catch(e => console.warn("bl3ss:", e)).then(() => setInterval(bl3ssPoll, 30000));
+  if ("IntersectionObserver" in window) { const wio = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { wio.disconnect(); start(); } }, { rootMargin: "1200px 0px" }); wio.observe($("bl3ss")); }
   else start();
 }
 
