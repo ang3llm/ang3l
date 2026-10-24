@@ -2658,7 +2658,8 @@ async function buyers(logs, max) {
   for (const l of logs) {
     const from = "0x" + l.topics[1].slice(26), to = "0x" + l.topics[2].slice(26);
     if (out.length === max) break;
-    if (bl3ss.seen.has(to) || /^0x0{40}$/.test(from) || await isContract(to) || !(await isContract(from))) continue;
+    // mints (from zero) and burns (to zero or 0x…dead) are not buys
+    if (bl3ss.seen.has(to) || /^0x0{40}$/.test(from) || /^0x0{40}$|dead$/i.test(to) || await isContract(to) || !(await isContract(from))) continue;
     bl3ss.seen.add(to); out.push(to);
   }
   return out;
