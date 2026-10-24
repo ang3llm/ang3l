@@ -11,9 +11,4 @@ src/Weights.sol
 test/Am3n.t.sol
 parts/
 docs/*.bin
-# feasibility scratch, superseded by src/Am3n.sol + its parity suite
-bench/
-HANDOFF.md
 docs/preview.json
-LAUNCH.md
-proto/
