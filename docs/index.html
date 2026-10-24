@@ -146,16 +146,25 @@ em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; lette
 .bmeta b { color: var(--hi); font-weight: 500; }
 .bmeta span { white-space: nowrap; }
 .bmeta button { background: none; border: 0; padding: 0; color: var(--hi); font: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-.h-foot { display: flex; align-items: stretch; gap: 14px; margin-top: 18px; }
-/* the counterfoil: the token's address, one line, with copy once it is issued */
-.ca { flex: 1; min-width: 0; container-type: inline-size; display: flex; align-items: center; gap: 10px 22px; padding: 14px 20px; border: 1px solid var(--line2); border-radius: 10px; background: rgba(11, 16, 32, .72); }
-.ca-k { font: 500 .75rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
-.ca-v { flex: 1; min-width: 0; font: 400 .8125rem/1.4 var(--mono); color: var(--muted); letter-spacing: .02em; }
-.ca-v.addr { color: var(--ink); white-space: nowrap; font-size: min(1.125rem, calc((100cqi - 230px) / 25.5)); letter-spacing: .01em; }
+/* the counterfoil: the token's address, centred under the blessing. Before launch an empty slot with the network; after,
+   the address on one line with Copy and the explorer */
+.h-foot { display: flex; justify-content: center; margin-top: 22px; }
+.ca { width: min(100%, 860px); container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "k n" "v a"; align-items: center; gap: 12px 20px; padding: 16px 22px 18px; border: 1px solid var(--line2); border-radius: 14px; background: linear-gradient(180deg, rgba(216, 179, 106, .06), rgba(11, 16, 32, .8) 70%); }
+.ca-k, .ca-n { font: 500 .6875rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+.ca-k { grid-area: k; color: var(--muted); }
+.ca-k b { color: var(--gold); font-weight: 500; }
+.ca-n { grid-area: n; justify-self: end; color: var(--dim); }
+.ca-v { grid-area: v; min-width: 0; display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: min(1.25rem, calc((100cqi - 250px) / 25.5)); line-height: 1.3; letter-spacing: .01em; color: var(--ink); white-space: nowrap; }
+.ca-v .ca-0 { color: var(--dim); }
+.ca-v .ca-line { flex: 1; min-width: 40px; border-bottom: 1px dashed var(--line2); transform: translateY(.3em); }
+.ca-a { grid-area: a; display: flex; align-items: center; gap: 8px; }
+.ca-b { display: inline-flex; align-items: center; justify-content: center; height: 34px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 99px; background: none; font: 500 .6875rem/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--hi); text-decoration: none; white-space: nowrap; cursor: pointer; transition: border-color .2s; }
+.ca-b:hover { border-color: var(--gold); color: var(--hi); }
+.ca-t { display: inline-flex; align-items: center; gap: 8px; font: 500 .6875rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.ca-t::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+/* the footer's copy button */
 .ca-s { padding: 6px 12px; border: 1px solid var(--rule); border-radius: 99px; background: none; font: 500 .625rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
-.motion { flex: none; align-self: center; background: none; border: 1px solid var(--rule); border-radius: 99px; color: var(--muted); font: 500 .625rem var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 8px 14px; cursor: pointer; }
-.motion:hover { color: var(--ink); border-color: var(--line2); }
 .rise { animation: rise .9s cubic-bezier(.2, .7, .2, 1) both; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } }
 
@@ -205,12 +214,11 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   .bless { font-size: 25px; }
   .vow { font-size: clamp(2.1rem, 9.4vw, 2.6rem); }
   .cta .btn { flex: 1 1 100%; }
-  .h-foot { flex-direction: column; }
-  .ca { flex-wrap: wrap; padding: 14px 16px; }
-  .ca-s { margin-left: auto; }
-  .ca-v { order: 3; flex-basis: 100%; }
-  .ca-v.addr { font-size: min(1rem, calc((100cqi - 4px) / 25.5)); }
-  .motion { align-self: center; }
+  .ca { grid-template-columns: minmax(0, 1fr); grid-template-areas: "k" "v" "a"; gap: 14px; padding: 16px; }
+  .ca-n { display: none; }
+  .ca-v { font-size: min(1.0625rem, calc((100cqi - 2px) / 25.5)); }
+  .ca-a { display: grid; grid-template-columns: 1fr 1fr; }
+  .ca-a > :only-child { grid-column: 1 / -1; justify-self: start; }
 }
 @media (max-width: 600px) { .hint .m, .hint .lm { display: none; } .hint .t { display: inline; } }
 
@@ -671,11 +679,11 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   </div>
   <div class="h-foot">
     <div class="ca" id="ca-bar" data-keep-clear>
-      <span class="ca-k">$ANG3L CA</span>
-      <span class="ca-v" id="ca">contract address · issued at launch</span>
-      <span class="ca-s" id="ca-s">not issued yet</span>
+      <span class="ca-k"><b>$ANG3L</b> · contract address</span>
+      <span class="ca-n">Robinhood Chain · 4663</span>
+      <span class="ca-v" id="ca"><span class="ca-0">0x</span><i class="ca-line" aria-hidden="true"></i></span>
+      <span class="ca-a" id="ca-a"><span class="ca-t">Issued at launch</span></span>
     </div>
-    <button class="motion" id="motion" type="button">Pause motion</button>
   </div>
 </section>
 
@@ -2059,7 +2067,7 @@ const heroCoin = (() => {
   if (!plate) document.documentElement.classList.add('no-gl');
   // a lost GPU context (a phone reclaiming it from a background tab, a driver reset) would leave a blank plate: the
   // stills stand in for it, as they do without WebGL2
-  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); plate = null; running = false; document.documentElement.classList.add('no-gl'); $('motion').hidden = true; });
+  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); plate = null; running = false; document.documentElement.classList.add('no-gl'); });
   // no underprint and no vignette: the night stays plain round the coin and meets the page; the glory still fills the coin's field
   const u = Engraving.scene({ bg: [0, 0.3, 0, 0], fx: [-1, 0.3, still ? 9 : 0, 0], strike: [-1, -1, 1, 0], stars: Engraving.litStars(0), rib: [0, 0, 0, 1] });
   const S = { open: still ? 1 : 0, blinkAt: 3.6, happy: 0, happyUntil: -1, glow: 0.3, mouth: 0, wing: 0, wingV: 0, wingT: 0, hop: 0, hopV: 0, sq: 0, sqV: 0,
@@ -2324,13 +2332,6 @@ const heroCoin = (() => {
     } catch (e) { quiet(); }
   }
 
-  const motion = $('motion');
-  if (still || !plate) motion.hidden = true;   // nothing to pause: reduced motion, or the stills stand in for the plate
-  motion.addEventListener('click', () => {
-    running = !running;
-    motion.textContent = running ? 'Pause motion' : 'Play motion';
-    wake();
-  });
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; wake(); }).observe(hero);
   document.addEventListener('visibilitychange', wake);
   let queued = false;
@@ -2803,10 +2804,9 @@ if (T3ACH) {
 // footer carry it too, and BL3SS is read when the reader nears it ----------
 if (TOKEN) {
   const copyOn = (btn, label) => { btn.onclick = () => navigator.clipboard.writeText(TOKEN).then(() => flash(btn, "copied", label)).catch(() => {}); };
-  $("ca").textContent = TOKEN; $("ca").classList.add("addr");
-  const b = Object.assign(document.createElement("button"), { className: "ca-s", id: "ca-copy", type: "button", textContent: "copy" });
-  copyOn(b, "copy");
-  $("ca-s").replaceWith(b);
+  $("ca").textContent = TOKEN;
+  $("ca-a").innerHTML = `<button class="ca-b" id="ca-copy" type="button" aria-label="Copy the token's address">⧉ Copy</button><a class="ca-b" href="${SCAN}token/${TOKEN}" target="_blank" rel="noopener">Explorer ↗</a>`;
+  copyOn($("ca-copy"), "⧉ Copy");
   // the pill drops the short address on narrow phones (CSS), so it is restored as markup after "copied"
   const pill = $("ca-pill"), pl = `$ANG3L <span class="pa">${short(TOKEN)}</span> ⧉`;
   pill.innerHTML = pl; pill.title = "Copy the token's address"; pill.hidden = false;
