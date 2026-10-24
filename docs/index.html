@@ -71,6 +71,12 @@ em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; lette
 .brand b { font: 600 1.15rem/1 var(--sans); letter-spacing: .06em; }
 .ca-pill { padding: 6px 11px; border: 1px solid var(--line2); border-radius: 99px; background: none; font: 500 .6875rem var(--mono); letter-spacing: .06em; color: var(--hi); cursor: pointer; white-space: nowrap; }
 .ca-pill:hover { border-color: var(--gold); }
+/* with the token's pill in it, a phone's bar keeps the brand, the pill and the menu: the X and GitHub icons are in the
+   menu's sections below and the footer, and the short address goes under 480 px (it is in the counterfoil) */
+@media (max-width: 760px) { .nav:has(.ca-pill:not([hidden])) .nav-end { display: none; } .nav .wrap { gap: 12px; } }
+@media (max-width: 480px) { .ca-pill .pa { display: none; } }
+/* on tablets the nine section links already fill the bar, so the pill keeps only $ANG3L and the icons step aside */
+@media (min-width: 761px) and (max-width: 1180px) { .nav:has(.ca-pill:not([hidden])) .nav-end { display: none; } .ca-pill .pa { display: none; } }
 .navlinks { margin-left: auto; display: flex; gap: 24px; }
 .navlinks a { font-size: .875rem; color: rgba(236, 230, 216, .74); text-decoration: none; transition: color .2s; white-space: nowrap; }
 .navlinks a:hover, .navlinks a[aria-current="true"] { color: var(--hi); }
@@ -990,7 +996,9 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
       <details><summary><span class="q-n">04</span>What does it know?</summary><p>Blessings, in four moods: for the builder, the holder, the night and the friend. It was trained on 80,000 short blessings, <span class="nw">hand-written</span> sentences plus a grammar. It does not chat or follow instructions; it is small on purpose, so that every word can be computed on chain.</p></details>
       <details><summary><span class="q-n">05</span>Why does the same name give the same words?</summary><p>Your words seed the sampler and every step is integer math, so the same input gives the same sentence on every node. A wallet's blessing changes once a day at 00:00 UTC, and today's blessing is the same for everyone until then.</p></details>
       <details><summary><span class="q-n">06</span>Can I link someone's blessing?</summary><p>Yes. Every answer has a Copy link button. The link carries only the words and the mood, or the wallet, for example <code>https://ang3l.ink/?bless=satoshi&amp;mood=2</code> or <code>https://ang3l.ink/?wallet=0x…</code>. Whoever opens it gets the blessing written again by the chain, live, not a stored copy; a wallet's words change once a UTC day.</p></details>
-      <details><summary><span class="q-n">07</span>Is $ANG3L an investment?</summary><p>No. ANG3L is an experiment and a free tool, and the $ANG3L token carries no promise of value or return. Its creator fees pay for putting the next angels on chain, starting with the second model, which is trained and tested; larger models after that are research. Asking stays free whether you hold it or not. Only buy what you can afford to lose.</p></details>
+      <details><summary><span class="q-n">07</span>What is BL3SS?</summary><p>Every wallet that buys $ANG3L gets its own blessing from AM3N, chosen by what the wallet holds. The page reads the newest buyers from the chain and asks <code>blessAddress</code> for each one: one free read call per wallet, with nothing added to anyone's trade.</p></details>
+      <details><summary><span class="q-n">08</span>What is T3ACH, and does it cost anything?</summary><p>T3ACH lets anyone write one line a day, 8 to 96 plain characters, for the next model to learn from. It is a transaction to the T3ach contract, signed by your wallet, and it costs only gas: a fraction of a cent on Robinhood Chain. Lessons that pass review join the next model's training set, which is published with it. Asking the angel stays free and needs no wallet.</p></details>
+      <details><summary><span class="q-n">09</span>Is $ANG3L an investment?</summary><p>No. ANG3L is an experiment and a free tool, and the $ANG3L token carries no promise of value or return. Its creator fees pay for putting the next angels on chain, starting with the second model, which is trained and tested; larger models after that are research. Asking stays free whether you hold it or not. Only buy what you can afford to lose.</p></details>
     </div>
   </div>
 </section>
@@ -2799,9 +2807,10 @@ if (TOKEN) {
   const b = Object.assign(document.createElement("button"), { className: "ca-s", id: "ca-copy", type: "button", textContent: "copy" });
   copyOn(b, "copy");
   $("ca-s").replaceWith(b);
-  const pill = $("ca-pill"), pl = `$ANG3L ${short(TOKEN)} ⧉`;
-  pill.textContent = pl; pill.title = "Copy the token's address"; pill.hidden = false;
-  copyOn(pill, pl);
+  // the pill drops the short address on narrow phones (CSS), so it is restored as markup after "copied"
+  const pill = $("ca-pill"), pl = `$ANG3L <span class="pa">${short(TOKEN)}</span> ⧉`;
+  pill.innerHTML = pl; pill.title = "Copy the token's address"; pill.hidden = false;
+  pill.onclick = () => navigator.clipboard.writeText(TOKEN).then(() => { pill.textContent = "copied"; setTimeout(() => { pill.innerHTML = pl; }, 1600); }).catch(() => {});
   $("c-ca-v").textContent = TOKEN; $("c-ca").hidden = false; copyOn($("c-ca-copy"), "copy");
   $("f-token").href = SCAN + "token/" + TOKEN; $("f-token").hidden = false;
   $("bl3ss-say").textContent = "Listening for the first buyers: each new wallet appears here, blessed, within 30 seconds.";
