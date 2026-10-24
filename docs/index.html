@@ -2713,7 +2713,7 @@ $("bl3ss-up").addEventListener("click", () => { setMode("wallet"); if (matchMedi
 // Writing is the reader's own transaction, sent through the wallet in their browser (EIP-1193) and only when they press
 // the button: the page's one write. The contract's rules are checked here first (8 to 96 printable ASCII bytes, one
 // lesson a wallet a UTC day), so a refusal shows in words before the wallet opens
-const T3ACH = "", T3ACH_BLOCK = 0;   // the T3ach contract and the block it was made in
+const T3ACH = "0x9BC42E99998855E2C368588e6f6D53c0D032B379", T3ACH_BLOCK = 96613274;   // the T3ach contract and the block it was made in
 const LESSON = "0x" + keccak256("Lesson(address,uint256,string)"), CHAIN = "0x1237";
 // a lesson is shown only when it reads like one: no links, handles or addresses, and none of these roots
 const unfit = s => /https?:|www\.|\.(com|io|xyz|fun|net|org|gg|me|co|app)\b|t\.me|@|0x[0-9a-f]{6}/i.test(s)

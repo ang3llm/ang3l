@@ -62,6 +62,7 @@ is T3ACH's, and only when the visitor presses it in their own wallet.
 |---|---|
 | Engine (AM3N) | [`0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811`](https://robinhoodchain.blockscout.com/address/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811), source verified on [Sourcify](https://repo.sourcify.dev/4663/0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811) (exact match) |
 | Weights | 15 data contracts, listed by `parts()` and in [`docs/parts.json`](docs/parts.json) |
+| T3ACH | [`0x9BC42E99998855E2C368588e6f6D53c0D032B379`](https://robinhoodchain.blockscout.com/address/0x9BC42E99998855E2C368588e6f6D53c0D032B379), the lessons for the next model, source verified on [Sourcify](https://repo.sourcify.dev/4663/0x9BC42E99998855E2C368588e6f6D53c0D032B379) (exact match) |
 
 ## Numbers
 
