@@ -543,6 +543,17 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
 @media (max-width: 1100px) { .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .wall { grid-template-columns: minmax(0, 1fr); } }
 
+/* ---------- t3ach: the ask panel's frame; the lesson to write on the left, the newest lessons on the right ---------- */
+.teach .field { resize: none; font: italic 400 1.35rem/1.35 var(--serif); }
+.teach .note { align-content: start; }
+.teach .form .lab span { color: var(--ink); }
+.lw { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.lw .hn { padding: 16px; }
+.lw .hn q { font-size: 1.12rem; }
+.lw:not(:empty) + .fine { display: none; }
+.hn-top a { text-decoration: none; }
+@media (max-width: 600px) { .lw { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- faq ---------- */
 .qa { border-top: 1px solid var(--line); }
 .qa details { border-bottom: 1px solid var(--rule); }
@@ -606,7 +617,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
     <a class="brand" href="#top" aria-label="ANG3L, home"><span id="nav-mark" aria-hidden="true"></span><b>ANG3L</b></a>
     <button class="ca-pill" id="ca-pill" type="button" hidden></button>
     <nav class="navlinks" id="navlinks" aria-label="Sections">
-      <a href="#ask">Ask</a><a href="#am3n">AM3N</a><a href="#bl3ss">BL3SS</a><a href="#how">How it works</a><a href="#proof">Proof</a><a href="#verify">Verify</a><a href="#roadmap">Roadmap</a><a href="#links">Links</a>
+      <a href="#ask">Ask</a><a href="#am3n">AM3N</a><a href="#bl3ss">BL3SS</a><a href="#t3ach">T3ACH</a><a href="#how">How it works</a><a href="#proof">Proof</a><a href="#verify">Verify</a><a href="#roadmap">Roadmap</a><a href="#links">Links</a>
     </nav>
     <span class="nav-end">
       <a class="icon-link" id="nav-x" href="https://x.com/ang3llm" target="_blank" rel="noopener" aria-label="ANG3L on X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
@@ -940,10 +951,37 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   </div>
 </section>
 
+<!-- T3ACH: lessons for the next model. Anyone reads them with no wallet; writing one line a UTC day is the reader's own
+     transaction, through the wallet in their browser, and the page's only write -->
+<section class="sec" id="t3ach" aria-labelledby="h-t3ach">
+  <div class="wrap">
+    <div class="sec-top rv"><span class="lab"><b>10</b> · T3ACH</span></div>
+    <div class="sec-head rv">
+      <h2 id="h-t3ach">T3ACH. <em>Write the next angel.</em></h2>
+      <p class="lede">Write one line a day for AM3N's next model to learn from. It is kept on Robinhood Chain in the log of the <a id="t-addr" href="#t3ach" target="_blank" rel="noopener">T3ach contract</a>, signed by your wallet, for anyone to read. Lessons that pass review join the training set of the next model put on chain, and the set is published with it.</p>
+    </div>
+    <div class="ask teach panel rv">
+      <form class="form" id="teach-form" novalidate>
+        <div class="fields">
+          <label class="lab" for="lesson">Your lesson · <span id="l-count">0</span> of 96</label>
+          <textarea class="field" id="lesson" rows="3" maxlength="96" placeholder="may your keys stay in your hands tonight." spellcheck="true"></textarea>
+        </div>
+        <button class="btn" id="teach-go" type="submit">Teach the angel</button>
+        <p class="fine" id="teach-say">One line per wallet per UTC day, 8 to 96 plain characters. It is a transaction on Robinhood Chain that costs a fraction of a cent in gas. Asking the angel stays free, with no wallet.</p>
+      </form>
+      <article class="note" aria-labelledby="l-for">
+        <div class="n-top"><span class="lab" id="l-for"><b>Lessons</b> · newest first</span><span class="lab" id="l-total">— so far</span></div>
+        <div class="wall lw" id="lesson-wall" aria-live="polite"></div>
+        <p class="fine" id="lesson-empty">No lessons yet. The first one could be yours.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
 <!-- faq -->
 <section class="sec" id="faq" aria-labelledby="h-faq">
   <div class="wrap">
-    <div class="sec-top rv"><span class="lab"><b>10</b> · Questions</span></div>
+    <div class="sec-top rv"><span class="lab"><b>11</b> · Questions</span></div>
     <div class="sec-head rv"><h2 id="h-faq">Asked often. <em>Answered plainly.</em></h2></div>
     <div class="qa rv">
       <details open><summary><span class="q-n">01</span>Is it really on chain?</summary><p>Yes. The weights are the code of fifteen contracts on Robinhood Chain, and the engine that runs them is verified on Sourcify as an exact match. When you ask, a Robinhood Chain node runs the whole model; this page only sends your words and shows the answer.</p></details>
@@ -960,7 +998,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
 <!-- links -->
 <section class="sec" id="links" aria-labelledby="h-links">
   <div class="wrap">
-    <div class="sec-top rv"><span class="lab"><b>11</b> · Links</span></div>
+    <div class="sec-top rv"><span class="lab"><b>12</b> · Links</span></div>
     <div class="sec-head rv"><h2 id="h-links">Find the angel. <em>Everywhere it lives.</em></h2><p class="lede">The project's public channels, the source, and the contracts themselves.</p></div>
     <nav class="chans panel rv" aria-label="Elsewhere">
       <a id="f-x" href="https://x.com/ang3llm" target="_blank" rel="noopener"><span class="lab">X · updates</span><b>@ang3llm <span>↗</span></b></a>
@@ -1888,7 +1926,8 @@ const f2 = n => Math.round(n * 100) / 100;
 const pad2 = n => String(n).padStart(2, "0");
 const wait = ms => new Promise(ok => setTimeout(ok, ms));
 
-// ---------- the chain: the page's one RPC helper; reads only (eth_call, eth_blockNumber, eth_getCode, eth_getLogs) ----------
+// ---------- the chain: the page's one RPC helper; reads only (eth_call, eth_blockNumber, eth_getCode, eth_getLogs,
+// eth_getTransactionReceipt) ----------
 // Errors come back in plain words; the page shows its own sentence and logs these. A request that fails on the way (no
 // network, no answer in 25 s, HTTP 429 or 5xx) is asked once more: of the second public RPC for eth_call,
 // eth_blockNumber and eth_getCode, and of the first again after a moment for eth_getLogs, which the second refuses as an
@@ -2314,7 +2353,7 @@ if ("IntersectionObserver" in window) {
     const a = document.querySelector(`.navlinks a[href="#${e.target.id}"]`);
     if (a) e.isIntersecting ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current");
   }), { rootMargin: "-45% 0px -50% 0px" });
-  ["ask", "am3n", "bl3ss", "how", "proof", "verify", "roadmap", "links"].forEach(id => navIo.observe($(id)));
+  ["ask", "am3n", "bl3ss", "t3ach", "how", "proof", "verify", "roadmap", "links"].forEach(id => navIo.observe($(id)));
 }
 
 function words(el, text, qm = "q") {
@@ -2669,6 +2708,88 @@ async function bl3ssPoll() {
 // before the token: the wallet form, one tap away
 $("bl3ss-up").href = "#ask-panel";
 $("bl3ss-up").addEventListener("click", () => { setMode("wallet"); if (matchMedia("(hover: hover) and (pointer: fine)").matches) setTimeout(() => $("wallet").focus({ preventScroll: true }), 500); });
+// ---------- 10. T3ACH: lessons for the next model ----------
+// Reading is a plain eth_getLogs over the contract since it was made, then a poll every 30 s while the page is visible.
+// Writing is the reader's own transaction, sent through the wallet in their browser (EIP-1193) and only when they press
+// the button: the page's one write. The contract's rules are checked here first (8 to 96 printable ASCII bytes, one
+// lesson a wallet a UTC day), so a refusal shows in words before the wallet opens
+const T3ACH = "", T3ACH_BLOCK = 0;   // the T3ach contract and the block it was made in
+const LESSON = "0x" + keccak256("Lesson(address,uint256,string)"), CHAIN = "0x1237";
+// a lesson is shown only when it reads like one: no links, handles or addresses, and none of these roots
+const unfit = s => /https?:|www\.|\.(com|io|xyz|fun|net|org|gg|me|co|app)\b|t\.me|@|0x[0-9a-f]{6}/i.test(s)
+  || /\b(fuck|shit|cunt|nigg|fag|retard|rape|kys|bitch|whore|slut|porn|nazi|scam|rug|honeypot)/i.test(s) || s.trim().split(/\s+/).length < 2;
+const tl = { last: 0, seen: new Set(), busy: false };
+function lessonCard(l, fresh) {
+  const n = parseInt(l.topics[2], 16), who = "0x" + l.topics[1].slice(26), line = strAt(l.data, 0);
+  if (tl.seen.has(n) || unfit(line)) return;
+  tl.seen.add(n);
+  const p = document.createElement("article");
+  p.className = "hn panel" + (fresh && !still ? " unroll" : "");
+  p.innerHTML = `<div class="hn-top lab"><span>Nº ${n}</span><a class="nocase" href="${EXPLORER}${who}" target="_blank" rel="noopener">${short(who)}</a></div><q></q>`;
+  p.querySelector("q").textContent = line;
+  const w = $("lesson-wall");
+  w.prepend(p);
+  while (w.children.length > 6) w.lastChild.remove();
+}
+async function lessonsRead() {
+  if (tl.busy || document.visibilityState !== "visible") return;
+  tl.busy = true;
+  try {
+    const head = parseInt(await rpc("eth_blockNumber", []), 16), first = !tl.last;
+    if (head <= tl.last) return;
+    const get = from => rpc("eth_getLogs", [{ address: T3ACH, topics: [LESSON], fromBlock: "0x" + from.toString(16), toBlock: "0x" + head.toString(16) }]);
+    // the whole history at first; if the RPC refuses so wide a range, the last day and a half
+    const logs = first ? await get(T3ACH_BLOCK).catch(() => get(Math.max(T3ACH_BLOCK, head - 1200000))) : await get(tl.last + 1);
+    tl.last = head;
+    for (const l of logs) lessonCard(l, !first);
+    $("l-total").textContent = fmt(parseInt(await rpc("eth_call", [{ to: T3ACH, data: "0x" + sel("lessons()") }, "latest"]), 16)) + " so far";
+  } catch (e) { console.warn("t3ach:", e); }
+  finally { tl.busy = false; }
+}
+const teachSay = (t, bad) => { $("teach-say").textContent = t; $("teach-say").classList.toggle("err", !!bad); };
+$("lesson").addEventListener("input", () => { $("l-count").textContent = new TextEncoder().encode($("lesson").value).length; });
+$("teach-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = $("teach-go"), line = $("lesson").value.trim(), eth = window.ethereum;
+  if (!/^[\x20-\x7e]{8,96}$/.test(line)) return teachSay("8 to 96 plain characters, please: letters, numbers and punctuation, no emoji or accents.", 1);
+  if (!eth) return teachSay("No wallet in this browser. Open ang3l.ink in your wallet's own browser (Rabby or MetaMask) to teach. Reading stays open to everyone.", 1);
+  btn.disabled = true;
+  try {
+    btn.textContent = "Waiting for your wallet…";
+    const from = (await eth.request({ method: "eth_requestAccounts" }))[0];
+    if ((await eth.request({ method: "eth_chainId" })) !== CHAIN) {
+      try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] }); }
+      catch (x) {
+        if (x.code !== 4902) throw x;
+        await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: CHAIN, chainName: "Robinhood Chain", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [SCAN] }] });
+      }
+    }
+    const day = Math.floor(Date.now() / 864e5) + 1;
+    if (parseInt(await rpc("eth_call", [{ to: T3ACH, data: "0x" + sel("taught(address)") + from.slice(2).toLowerCase().padStart(64, "0") }, "latest"]), 16) === day)
+      return teachSay("This wallet has taught today. Its next lesson opens at 00:00 UTC.", 1);
+    const hash = await eth.request({ method: "eth_sendTransaction", params: [{ from, to: T3ACH, data: "0x" + sel("teach(string)") + word(32) + strArg(line) }] });
+    btn.textContent = "Writing it on chain…";
+    let rc = null;
+    for (let i = 0; i < 40 && !rc; i++) { await wait(1500); rc = await rpc("eth_getTransactionReceipt", [hash]).catch(() => null); }
+    if (!rc) return teachSay("Sent. It shows here once its block lands.");
+    if (rc.status !== "0x1") return teachSay("The chain refused the lesson, so nothing was kept; only the gas was spent.", 1);
+    const l = rc.logs.find(x => x.address.toLowerCase() === T3ACH.toLowerCase() && x.topics[0] === LESSON);
+    if (l) { lessonCard(l, true); $("lesson").value = ""; $("l-count").textContent = "0"; }
+    $("teach-say").innerHTML = `Lesson Nº ${l ? parseInt(l.topics[2], 16) : ""} is on chain, signed by your wallet. Thank you, teacher. <a href="${SCAN}tx/${hash}" target="_blank" rel="noopener">See the transaction ↗</a>`;
+    $("teach-say").classList.remove("err");
+  } catch (x) {
+    teachSay(x && x.code === 4001 ? "Nothing was sent." : "Stopped: " + ((x && x.message) || x), !(x && x.code === 4001));
+  } finally { btn.disabled = false; btn.textContent = "Teach the angel"; }
+});
+if (T3ACH) {
+  $("t-addr").href = EXPLORER + T3ACH;
+  const go = () => lessonsRead().then(() => setInterval(lessonsRead, 30000));
+  if ("IntersectionObserver" in window) { const o = new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) { o.disconnect(); go(); } }, { rootMargin: "1200px 0px" }); o.observe($("t3ach")); }
+  else go();
+} else {
+  $("teach-go").disabled = true; $("teach-go").textContent = "Opens soon";
+  $("lesson-empty").textContent = "T3ACH opens in a moment: its contract goes on chain before the token does.";
+}
 // ---------- once the token is set: the counterfoil shows its address on one line with a copy button, the nav and the
 // footer carry it too, and BL3SS is read when the reader nears it ----------
 if (TOKEN) {

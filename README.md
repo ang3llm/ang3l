@@ -38,7 +38,8 @@ cast call 0x2D58843F8cd565E1FbBE01Ea5d67F3d13cb91811 "today()(string)" --rpc-url
 ## On the site
 
 [`docs/index.html`](docs/index.html) is the whole site, one file that asks the chain from the visitor's browser with
-reads only (`eth_call`, `eth_blockNumber`, `eth_getCode`, `eth_getLogs`).
+reads only (`eth_call`, `eth_blockNumber`, `eth_getCode`, `eth_getLogs`, `eth_getTransactionReceipt`). Its one write
+is T3ACH's, and only when the visitor presses it in their own wallet.
 
 - **Ask**: a name in one of the four moods, or a wallet. The answer comes with a share card, a post to X and a link.
 - **Links to a blessing**: `https://ang3l.ink/?bless=satoshi&mood=2` or `https://ang3l.ink/?wallet=0x…`. The page
@@ -47,6 +48,13 @@ reads only (`eth_call`, `eth_blockNumber`, `eth_getCode`, `eth_getLogs`).
   words, or of the wallet and the UTC day), calls `generate(string,uint256)`, shows the token ids one by one with
   their words from the 434-token vocabulary, and joins them exactly as the contract does.
 - **Check the weights**: re-derives every part's CREATE2 address from its bytes and hashes the stream (below).
+- **BL3SS**: once the token is live, its newest buyers, each blessed by `blessAddress` as the page opens, then new ones
+  as they come. One free read per wallet, no special pool, nothing added to anyone's trade.
+- **T3ACH**: anyone may write one line a UTC day for the next model to learn from, 8 to 96 printable ASCII bytes. The
+  [`T3ach`](src/T3ach.sol) contract keeps nothing but a counter and each wallet's last day; the lines live in its
+  `Lesson` event log, signed by the wallet that wrote them. Lines that pass review join the next model's training set,
+  which is published with that model. The page shows the newest lessons, leaving out links, handles, addresses and
+  abuse.
 
 ## Deployed
 
