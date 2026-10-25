@@ -13,7 +13,7 @@ contract `Am3n`.
 | | |
 |---|---|
 | Site | [ang3l.ink](https://ang3l.ink/) |
-| X | [@ang3llm](https://x.com/ang3llm) |
+| X | [@ang3l_ink](https://x.com/ang3l_ink) |
 | Source | [github.com/ang3llm/ang3l](https://github.com/ang3llm/ang3l) |
 | Research | [research/](research/): one numbered folder per experiment, starting with [the packed kernel](research/001-packed-kernel/) |
 | Contributing | [CONTRIBUTING.md](CONTRIBUTING.md) |
