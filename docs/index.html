@@ -69,6 +69,8 @@ em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; lette
 .nav, .hero { line-height: normal; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
 .brand svg { width: 30px; height: 30px; display: block; }
+.px { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.sec-title .px-sec { margin: 0 0 16px; filter: drop-shadow(0 0 14px rgba(242, 200, 111, .28)); }
 .brand b { font: 600 1.15rem/1 var(--sans); letter-spacing: .06em; }
 .ca-pill { padding: 6px 11px; border: 1px solid var(--line2); border-radius: 99px; background: none; font: 500 .6875rem var(--mono); letter-spacing: .06em; color: var(--hi); cursor: pointer; white-space: nowrap; }
 .ca-pill:hover { border-color: var(--gold); }
@@ -629,7 +631,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
 <body>
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="ANG3L, home"><span id="nav-mark" aria-hidden="true"></span><b>ANG3L</b></a>
+    <a class="brand" href="#top" aria-label="ANG3L, home"><img id="nav-mark" class="px" src="px-am3n.png" width="36" height="34" alt=""><b>ANG3L</b></a>
     <button class="ca-pill" id="ca-pill" type="button" hidden></button>
     <nav class="navlinks" id="navlinks" aria-label="Sections">
       <a href="#ask">Ask</a><a href="#am3n">AM3N</a><a href="#bl3ss">BL3SS</a><a href="#t3ach">T3ACH</a><a href="#how">How it works</a><a href="#proof">Proof</a><a href="#verify">Verify</a><a href="#roadmap">Roadmap</a><a href="#links">Links</a>
@@ -704,7 +706,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   <div class="wrap">
     <div class="sec-top rv"><span class="lab"><b>01</b> · Meet AM3N</span></div>
     <div class="sec-head rv">
-      <h2 id="h-am3n">Meet AM3N. <em>ANG3L's model.</em></h2>
+      <div class="sec-title"><img class="px px-sec" src="px-am3n.png" width="72" height="68" alt=""><h2 id="h-am3n">Meet AM3N. <em>ANG3L's model.</em></h2></div>
       <p class="lede">A <span class="nw">mixture-of-experts</span> transformer that lives on Robinhood Chain. Its <b>1,239,424 weights</b> are the code of fifteen contracts, and an engine contract named <code>Am3n</code> runs the whole model when you ask.</p>
     </div>
     <div class="meet">
@@ -958,7 +960,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   <div class="wrap">
     <div class="sec-top rv"><span class="lab"><b>09</b> · BL3SS</span></div>
     <div class="sec-head rv">
-      <h2 id="h-bl3ss">BL3SS. <em>Every buyer, blessed.</em></h2>
+      <div class="sec-title"><img class="px px-sec" src="px-bl3ss.png" width="72" height="88" alt=""><h2 id="h-bl3ss">BL3SS. <em>Every buyer, blessed.</em></h2></div>
       <p class="lede">Every wallet that buys $ANG3L gets its own blessing from AM3N, chosen by what the wallet holds. One free read call per wallet: no special pool, no extra gas on your trade.</p>
     </div>
     <div class="wall" id="wall" aria-live="polite"></div>
@@ -972,7 +974,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   <div class="wrap">
     <div class="sec-top rv"><span class="lab"><b>10</b> · T3ACH</span></div>
     <div class="sec-head rv">
-      <h2 id="h-t3ach">T3ACH. <em>Write the next angel.</em></h2>
+      <div class="sec-title"><img class="px px-sec" src="px-t3ach.png" width="72" height="68" alt=""><h2 id="h-t3ach">T3ACH. <em>Write the next angel.</em></h2></div>
       <p class="lede">Write one line a day for AM3N's next model to learn from. It is kept on Robinhood Chain in the log of the <a id="t-addr" href="#t3ach" target="_blank" rel="noopener">T3ach contract</a>, signed by your wallet, for anyone to read. Lessons that pass review join the training set of the next model put on chain, and the set is published with it.</p>
     </div>
     <div class="ask teach panel rv">
@@ -1033,7 +1035,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
     <span class="f-word" aria-hidden="true">ANG3L</span>
     <div class="f-row">
       <div style="display:grid;gap:14px">
-        <div class="f-brand"><span id="f-mark" aria-hidden="true"></span><b>ANG3L</b></div>
+        <div class="f-brand"><img id="f-mark" class="px" src="px-am3n.png" width="36" height="34" alt=""><b>ANG3L</b></div>
         <p class="f-line">Asking stays free. <em>Amen.</em></p>
         <p class="f-ca" id="c-ca" hidden><span class="lab"><b>$ANG3L</b> CA</span><code id="c-ca-v"></code><button class="ca-s" id="c-ca-copy" type="button">copy</button></p>
         <p class="f-risk">ANG3L is an experiment and a free tool. The $ANG3L token carries no promise of value or return: only buy what you can afford to lose.</p>
@@ -2349,8 +2351,6 @@ const heroCoin = (() => {
 })();
 
 // the mark: in the nav and the footer
-$("nav-mark").innerHTML = ang3lInline(24);
-$("f-mark").innerHTML = ang3lInline(28);
 
 // ---------- nav ----------
 const menu = $("menu"), navlinks = $("navlinks");
