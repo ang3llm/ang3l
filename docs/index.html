@@ -1948,10 +1948,12 @@ const wait = ms => new Promise(ok => setTimeout(ok, ms));
 // ---------- the chain: the page's one RPC helper; reads only (eth_call, eth_blockNumber, eth_getCode, eth_getLogs,
 // eth_getTransactionReceipt) ----------
 // Errors come back in plain words; the page shows its own sentence and logs these. A request that fails on the way (no
-// network, no answer in 25 s, HTTP 429 or 5xx) is asked once more: of the second public RPC for eth_call,
-// eth_blockNumber and eth_getCode, and of the first again after a moment for eth_getLogs, which the second refuses as an
-// archive request. An answer that carries an error is an answer, and is not asked again
-const RPC2 = "https://robinhood-rpc.publicnode.com", ON_RPC2 = new Set(["eth_call", "eth_blockNumber", "eth_getCode"]);
+// network, no answer in 25 s, HTTP 429 or 5xx, or a network that blocks the chain's own RPC) is asked again of public
+// mirrors in turn. publicnode and drpc refuse eth_getLogs on their free tiers; thirdweb takes it over at most 1,000
+// blocks and refuses more in words, which BL3SS's reader answers by asking for a shorter span. An answer from the
+// chain's own RPC that carries an error is an answer, and is not asked again
+const MIRRORS = ["https://robinhood-rpc.publicnode.com", "https://4663.rpc.thirdweb.com", "https://robinhood.drpc.org"];
+const LOG_MIRRORS = ["https://4663.rpc.thirdweb.com"];
 const retryable = msg => Object.assign(new Error(msg), { retry: true });
 async function post(url, method, params) {
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 25000);
@@ -1969,13 +1971,25 @@ async function post(url, method, params) {
     throw e;
   } finally { clearTimeout(timer); }
 }
+// the mirror answers eth_getLogs over at most 1,000 blocks, so a read of up to 8,000 (BL3SS's shorter spans) is asked
+// in 1,000-block pieces, one after another (a burst gets the page refused); anything longer, or a tag such as
+// "latest", goes as asked and the mirror's refusal makes BL3SS's reader shorten its span
+async function mirrorLogs(url, params) {
+  const q = params[0], a = parseInt(q.fromBlock, 16), n = parseInt(q.toBlock, 16) - a + 1;
+  if (!(n > 1000) || n > 8000) return post(url, "eth_getLogs", params);
+  const out = [];
+  for (let lo = a; lo < a + n; lo += 1000) out.push(...await post(url, "eth_getLogs", [{ ...q, fromBlock: hex(lo), toBlock: hex(Math.min(a + n - 1, lo + 999)) }]));
+  return out;
+}
 async function rpc(method, params) {
   try { return await post(RPC, method, params); }
   catch (e) {
     if (!e.retry) throw e;
-    if (ON_RPC2.has(method)) return post(RPC2, method, params);
-    await wait(1200);
-    return post(RPC, method, params);
+    let last = e;
+    for (const url of method === "eth_getLogs" ? LOG_MIRRORS : MIRRORS) {
+      try { return await (method === "eth_getLogs" ? mirrorLogs(url, params) : post(url, method, params)); } catch (e2) { last = e2; }
+    }
+    throw last;
   }
 }
 // a dynamic bytes/string argument from raw bytes
