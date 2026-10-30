@@ -152,7 +152,7 @@ em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; lette
 /* the counterfoil: the token's address, centred under the blessing. Before launch an empty slot with the network; after,
    the address on one line with Copy and the explorer */
 .h-foot { display: flex; justify-content: center; margin-top: 22px; }
-.ca { width: min(100%, 860px); container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "k n" "v a" "b b"; align-items: center; gap: 12px 20px; padding: 16px 22px 18px; border: 1px solid var(--line2); border-radius: 14px; background: linear-gradient(180deg, rgba(216, 179, 106, .06), rgba(11, 16, 32, .8) 70%); }
+.ca { width: min(100%, 860px); container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "k n" "v a"; align-items: center; gap: 12px 20px; padding: 16px 22px 18px; border: 1px solid var(--line2); border-radius: 14px; background: linear-gradient(180deg, rgba(216, 179, 106, .06), rgba(11, 16, 32, .8) 70%); }
 .ca-k, .ca-n { font: 500 .6875rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
 .ca-k { grid-area: k; color: var(--muted); }
 .ca-k b { color: var(--gold); font-weight: 500; }
@@ -165,14 +165,6 @@ em, .it { font-family: var(--serif); font-style: italic; font-weight: 400; lette
 .ca-b:hover { border-color: var(--gold); color: var(--hi); }
 .ca-t { display: inline-flex; align-items: center; gap: 8px; font: 500 .6875rem/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .ca-t::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-/* the buy box: plain ETH in and out through the ANG3L router, under the address once the token is live */
-.ca-buy { grid-area: b; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding-top: 14px; border-top: 1px dashed var(--line2); }
-.ca-buy[hidden] { display: none; }
-.ca-in { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 99px; font: 500 .6875rem/1 var(--mono); letter-spacing: .12em; color: var(--muted); }
-.ca-in input { width: 64px; padding: 0; border: 0; background: none; outline: none; font: 500 .875rem/1 var(--mono); color: var(--hi); }
-.ca-in:focus-within { border-color: var(--gold); }
-.ca-go { border-color: var(--gold); color: var(--gold); }
-.ca-say { flex: 1 1 220px; font: 500 .6875rem/1.45 var(--mono); letter-spacing: .06em; color: var(--muted); }
 /* the footer's copy button */
 .ca-s { padding: 6px 12px; border: 1px solid var(--rule); border-radius: 99px; background: none; font: 500 .625rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
@@ -225,7 +217,7 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
   .bless { font-size: 25px; }
   .vow { font-size: clamp(2.1rem, 9.4vw, 2.6rem); }
   .cta .btn { flex: 1 1 100%; }
-  .ca { grid-template-columns: minmax(0, 1fr); grid-template-areas: "k" "v" "a" "b"; gap: 14px; padding: 16px; }
+  .ca { grid-template-columns: minmax(0, 1fr); grid-template-areas: "k" "v" "a"; gap: 14px; padding: 16px; }
   .ca-n { display: none; }
   .ca-v { font-size: min(1.0625rem, calc((100cqi - 2px) / 25.5)); }
   .ca-a { display: grid; grid-template-columns: 1fr 1fr; }
@@ -694,12 +686,6 @@ button.ca-s { cursor: pointer; color: var(--hi); border-color: var(--line2); }
       <span class="ca-n">Robinhood Chain · 4663</span>
       <span class="ca-v" id="ca"><span class="ca-0">0x</span><i class="ca-line" aria-hidden="true"></i></span>
       <span class="ca-a" id="ca-a"><span class="ca-t">Issued at launch</span></span>
-      <div class="ca-buy" id="ca-buy" hidden>
-        <label class="ca-in"><input id="buy-eth" inputmode="decimal" autocomplete="off" value="0.01" aria-label="ETH to spend">ETH</label>
-        <button class="ca-b ca-go" id="buy-go" type="button">Buy</button>
-        <button class="ca-b" id="sell-go" type="button">Sell all</button>
-        <span class="ca-say" id="buy-say" aria-live="polite">One transaction, plain ETH. The liquidity is locked for good; 2% of each trade funds the angel.</span>
-      </div>
     </div>
   </div>
 </section>
@@ -1939,9 +1925,6 @@ const DEPLOYER_WALLET = "0x7Cfd8b2f3EF62656285E508F3A11745DeC8A92Fd"; // sent al
 const SITE = "https://ang3l.ink/", HOST = "ang3l.ink";   // deep links, posts and the share card always name the live site
 const SCAN = "https://robinhoodchain.blockscout.com/", EXPLORER = SCAN + "address/";
 const DEPLOYER = "4e59b44847b379578588920ca78fbf26c0b4956c";
-// the token's one pool (Uniswap v4, WETH/ANG3L, its hook takes 2% and locks the liquidity) and the buy box's way in
-const HOOK = "0x62Ce7f852A2F90741BfBbAE56A0FC28Ad59d2aCc", ROUTER = "0x6f96c10Ed4077187fe864514983c21c16ceFdff4";
-const WETH = "0x0bd7d308f8e1639fab988df18a8011f41eacad73", QUOTER = "0x8dc178efb8111bb0973dd9d722ebeff267c98f94";
 // docs/parts.json, inlined so the page also works from a file; the two must stay identical (ADDRESS and PARTS change together)
 const PARTS = {"parts": ["0x7750267a5deb4883d192189eb32ecff7f31362c9", "0xb4a490cdedd1b0fdedd96671fa2c057878b185e7", "0x161c65782244aec4f31b0077459001b088127508", "0xc6d4805e58e943b92c5b7ad976d553f0631e2c3b", "0xff27532194cee58eedbe6309af78e844277a3025", "0x7f22f4cb205bc186a143e1017ead3f11aa9c33de", "0x45eddbce2c7cacdb2b6761a475d2be7e335b04d5", "0x2b5402246b628575a95977a2e13ee4bec845f573", "0x103492f62156ab7f2483fca9e2465f86ea6500c1", "0x954164b002e8b31b6505e2c75c88be1faf293f16", "0xc9cb7209797aeb9314db7c89d8ca14c5d2a9e555", "0x64822c6e070abefeb88ad5f014d7eba91cd0c0a3", "0x8b7671125a006df351a6963f66c24cb585582293", "0x06759ab69e44dc6f3a5200be29a494df4f2e2908", "0x8453d1c3799a34c5d85cfcdc11c93ebb1fb87b07"], "bytes": 1247360, "keccak": "0x51cc9ae0514c7b199cb15c97844133b9b08bb13771c44d70266fdc551884a7e2"};
 // model/weights.json 'vocab': AM3N's 434 tokens, id = index (5 builder, 6 friend, 7 holder, 9 night, 8 the name)
@@ -2823,68 +2806,6 @@ $("teach-form").addEventListener("submit", async e => {
     teachSay(x && x.code === 4001 ? "Nothing was sent." : "Stopped: " + ((x && x.message) || x), !(x && x.code === 4001));
   } finally { btn.disabled = false; btn.textContent = "Teach the angel"; }
 });
-// ---------- the buy box: ETH in through the router in one transaction; selling all asks for one approval first.
-// The quote comes from Uniswap's V4Quoter; a trade that would get 5% less than it is refused by the router ----------
-const hexAddr = a => a.slice(2).toLowerCase().padStart(64, "0");
-async function wallet() {
-  const eth = window.ethereum;
-  const from = (await eth.request({ method: "eth_requestAccounts" }))[0];
-  if ((await eth.request({ method: "eth_chainId" })) !== CHAIN) {
-    try { await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN }] }); }
-    catch (x) {
-      if (x.code !== 4902) throw x;
-      await eth.request({ method: "wallet_addEthereumChain", params: [{ chainId: CHAIN, chainName: "Robinhood Chain", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: [RPC], blockExplorerUrls: [SCAN] }] });
-    }
-  }
-  return from;
-}
-async function sendTx(tx) {
-  const hash = await window.ethereum.request({ method: "eth_sendTransaction", params: [tx] });
-  for (let i = 0; i < 60; i++) {
-    await wait(1500);
-    const rc = await rpc("eth_getTransactionReceipt", [hash]).catch(() => null);
-    if (rc) { if (rc.status !== "0x1") throw new Error("the chain refused it; only the gas was spent"); return hash; }
-  }
-  return hash;
-}
-const quote = async (buy, amount) => BigInt((await rpc("eth_call", [{ to: QUOTER, data: "0x" + sel("quoteExactInputSingle(((address,address,uint24,int24,address),bool,uint128,bytes))")
-  + word(32) + hexAddr(WETH) + hexAddr(TOKEN) + word(0) + word(200) + hexAddr(HOOK) + word(buy ? 1 : 0) + word(amount) + word(256) + word(0) }, "latest"])).slice(0, 66));
-const balanceOf = async (tok, who) => BigInt(await rpc("eth_call", [{ to: tok, data: "0x" + sel("balanceOf(address)") + hexAddr(who) }, "latest"]));
-function buyBox() {
-  const say = t => { $("buy-say").textContent = t; }, both = on => { $("buy-go").disabled = $("sell-go").disabled = !on; };
-  const trade = run => async () => {
-    if (!window.ethereum) return say("No wallet in this browser. Open ang3l.ink in your wallet's own browser (Rabby or MetaMask) to buy.");
-    both(false);
-    try { await run(await wallet()); }
-    catch (x) { say(x && x.code === 4001 ? "Nothing was sent." : "Stopped: " + ((x && x.message) || x)); }
-    finally { both(true); }
-  };
-  $("buy-go").onclick = trade(async from => {
-    const v = $("buy-eth").value.trim();
-    if (!/^(\d+\.?\d*|\.\d+)$/.test(v) || !(parseFloat(v) > 0)) return say("Type how much ETH to spend, like 0.01.");
-    const wei = BigInt(Math.round(parseFloat(v) * 1e9)) * 10n ** 9n;
-    say("Asking the pool for a price…");
-    const out = await quote(true, wei);
-    say("Confirm in your wallet: " + v + " ETH for about " + fmt(Number(out / 10n ** 18n)) + " $ANG3L.");
-    await sendTx({ from, to: ROUTER, value: "0x" + wei.toString(16), data: "0x" + sel("buy(uint256)") + word(out * 95n / 100n) });
-    say("Bought about " + fmt(Number(out / 10n ** 18n)) + " $ANG3L. BL3SS blesses your wallet below within 30 seconds.");
-  });
-  $("sell-go").onclick = trade(async from => {
-    const bal = await balanceOf(TOKEN, from);
-    if (bal === 0n) return say("This wallet holds no $ANG3L yet.");
-    const allowed = BigInt(await rpc("eth_call", [{ to: TOKEN, data: "0x" + sel("allowance(address,address)") + hexAddr(from) + hexAddr(ROUTER) }, "latest"]));
-    if (allowed < bal) {
-      say("Step 1 of 2: let the router move your $ANG3L (confirm in your wallet).");
-      await sendTx({ from, to: TOKEN, data: "0x" + sel("approve(address,uint256)") + hexAddr(ROUTER) + word(bal) });
-    }
-    say("Asking the pool for a price…");
-    const out = await quote(false, bal);
-    say("Confirm in your wallet: all " + fmt(Number(bal / 10n ** 18n)) + " $ANG3L for about " + (Number(out) / 1e18).toFixed(4) + " ETH.");
-    await sendTx({ from, to: ROUTER, data: "0x" + sel("sell(uint256,uint256)") + word(bal) + word(out * 95n / 100n) });
-    say("Sold for about " + (Number(out) / 1e18).toFixed(4) + " ETH.");
-  });
-  $("ca-buy").hidden = false;
-}
 if (T3ACH) {
   $("t-addr").href = EXPLORER + T3ACH;
   const go = () => lessonsRead().then(() => setInterval(lessonsRead, 30000));
@@ -2907,7 +2828,6 @@ if (TOKEN) {
   pill.onclick = () => navigator.clipboard.writeText(TOKEN).then(() => { pill.textContent = "copied"; setTimeout(() => { pill.innerHTML = pl; }, 1600); }).catch(() => {});
   $("c-ca-v").textContent = TOKEN; $("c-ca").hidden = false; copyOn($("c-ca-copy"), "copy");
   $("f-token").href = SCAN + "token/" + TOKEN; $("f-token").hidden = false;
-  buyBox();
   $("bl3ss-say").textContent = "Listening for the first buyers: each new wallet appears here, blessed, within 30 seconds.";
   $("bl3ss-up").hidden = true;
   const start = () => bl3ssFirst().catch(e => console.warn("bl3ss:", e)).then(() => setInterval(bl3ssPoll, 30000));
